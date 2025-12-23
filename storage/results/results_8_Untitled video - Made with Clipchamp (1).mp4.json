@@ -1,0 +1,83 @@
+[
+    {
+        "id": 94,
+        "plate_number": "DL 8S CN 2928",
+        "confidence": 0.95,
+        "vehicle_info": "Red Hero Splendor",
+        "timestamp": 0.0,
+        "video_id": 8,
+        "track_id": 3
+    },
+    {
+        "id": 95,
+        "plate_number": "DL 1CC 5334",
+        "confidence": 0.98,
+        "vehicle_info": "Red Renault Duster",
+        "timestamp": 1.0,
+        "video_id": 8,
+        "track_id": 1
+    },
+    {
+        "id": 96,
+        "plate_number": "NO PLATE",
+        "confidence": 0.95,
+        "vehicle_info": "Silver Maruti Suzuki Alto",
+        "timestamp": 1.9,
+        "video_id": 8,
+        "track_id": 2
+    },
+    {
+        "id": 97,
+        "plate_number": "DL 1S CE 4729",
+        "confidence": 0.9,
+        "vehicle_info": "Black Hero Splendor",
+        "timestamp": 0.5,
+        "video_id": 8,
+        "track_id": 4
+    },
+    {
+        "id": 98,
+        "plate_number": "DL 1S CT 0739",
+        "confidence": 0.98,
+        "vehicle_info": "Black Hero Splendor Plus",
+        "timestamp": 0.5,
+        "video_id": 8,
+        "track_id": 7
+    },
+    {
+        "id": 99,
+        "plate_number": "NO PLATE",
+        "confidence": 0.85,
+        "vehicle_info": "Dark Grey Honda Shine",
+        "timestamp": 2.0,
+        "video_id": 8,
+        "track_id": 25
+    },
+    {
+        "id": 100,
+        "plate_number": "N/A",
+        "confidence": 0.9,
+        "vehicle_info": "Black Generic Bicycle",
+        "timestamp": 1.9,
+        "video_id": 8,
+        "track_id": 27
+    },
+    {
+        "id": 101,
+        "plate_number": "NO PLATE",
+        "confidence": 0.88,
+        "vehicle_info": "Dark Grey Honda Activa",
+        "timestamp": 2.0,
+        "video_id": 8,
+        "track_id": 31
+    },
+    {
+        "id": 102,
+        "plate_number": "NO PLATE",
+        "confidence": 0.7,
+        "vehicle_info": "Dark Red Generic Scooter",
+        "timestamp": 1.9,
+        "video_id": 8,
+        "track_id": 39
+    }
+]

@@ -1,0 +1,488 @@
+[
+    {
+        "id": 1,
+        "plate_number": "DL 12 SA 2555",
+        "confidence": 0.9,
+        "vehicle_info": "Maroon Hero Splendor Plus",
+        "timestamp": 0.3003,
+        "video_id": 1,
+        "track_id": 72
+    },
+    {
+        "id": 2,
+        "plate_number": "NO PLATE",
+        "confidence": 0.85,
+        "vehicle_info": "White Maruti Dzire",
+        "timestamp": 0.5005000000000001,
+        "video_id": 1,
+        "track_id": 75
+    },
+    {
+        "id": 3,
+        "plate_number": "UP 16 AZ 6239",
+        "confidence": 0.95,
+        "vehicle_info": "Black Hero Splendor",
+        "timestamp": 0.5005000000000001,
+        "video_id": 1,
+        "track_id": 1
+    },
+    {
+        "id": 4,
+        "plate_number": "NO PLATE",
+        "confidence": 0.7,
+        "vehicle_info": "White Generic Scooter",
+        "timestamp": 2.5025,
+        "video_id": 1,
+        "track_id": 124
+    },
+    {
+        "id": 5,
+        "plate_number": "NO PLATE",
+        "confidence": 0.85,
+        "vehicle_info": "Light Grey Maruti Alto",
+        "timestamp": 2.3023000000000002,
+        "video_id": 1,
+        "track_id": 71
+    },
+    {
+        "id": 6,
+        "plate_number": "NO PLATE",
+        "confidence": 0.9,
+        "vehicle_info": "Black Generic Bicycle",
+        "timestamp": 2.9029000000000003,
+        "video_id": 1,
+        "track_id": 107
+    },
+    {
+        "id": 7,
+        "plate_number": "NO PLATE",
+        "confidence": 0.8,
+        "vehicle_info": "White Maruti Dzire",
+        "timestamp": 2.8028,
+        "video_id": 1,
+        "track_id": 160
+    },
+    {
+        "id": 8,
+        "plate_number": "DL 3C AB 8272",
+        "confidence": 0.9,
+        "vehicle_info": "Red Mahindra TUV300",
+        "timestamp": 0.3003,
+        "video_id": 1,
+        "track_id": 62
+    },
+    {
+        "id": 9,
+        "plate_number": "DL 3S AU 0055",
+        "confidence": 0.95,
+        "vehicle_info": "Red Honda Activa",
+        "timestamp": 3.6036,
+        "video_id": 1,
+        "track_id": 170
+    },
+    {
+        "id": 10,
+        "plate_number": "DL 7S AE 1414",
+        "confidence": 0.9,
+        "vehicle_info": "Black Honda Shine",
+        "timestamp": 3.3033,
+        "video_id": 1,
+        "track_id": 31
+    },
+    {
+        "id": 11,
+        "plate_number": "NO PLATE",
+        "confidence": 0.85,
+        "vehicle_info": "Dark Generic Motorcycle",
+        "timestamp": 3.6036,
+        "video_id": 1,
+        "track_id": 194
+    },
+    {
+        "id": 12,
+        "plate_number": "DL 5SB 15",
+        "confidence": 0.9,
+        "vehicle_info": "Blue Honda Activa",
+        "timestamp": 3.2032000000000003,
+        "video_id": 1,
+        "track_id": 134
+    },
+    {
+        "id": 13,
+        "plate_number": "N/A",
+        "confidence": 0.9,
+        "vehicle_info": "Brown Generic Bicycle",
+        "timestamp": 4.4044,
+        "video_id": 1,
+        "track_id": 99
+    },
+    {
+        "id": 14,
+        "plate_number": "NO PLATE",
+        "confidence": 0.85,
+        "vehicle_info": "Black Generic Motorcycle",
+        "timestamp": 4.3043000000000005,
+        "video_id": 1,
+        "track_id": 171
+    },
+    {
+        "id": 15,
+        "plate_number": "NO PLATE",
+        "confidence": 0.7,
+        "vehicle_info": "Dark Generic Motorcycle",
+        "timestamp": 5.3053,
+        "video_id": 1,
+        "track_id": 228
+    },
+    {
+        "id": 16,
+        "plate_number": "NO PLATE",
+        "confidence": 0.85,
+        "vehicle_info": "Black Generic Scooter",
+        "timestamp": 5.2052000000000005,
+        "video_id": 1,
+        "track_id": 116
+    },
+    {
+        "id": 17,
+        "plate_number": "DL 3BTS 0385",
+        "confidence": 0.95,
+        "vehicle_info": "Red Honda Activa",
+        "timestamp": 5.6056,
+        "video_id": 1,
+        "track_id": 179
+    },
+    {
+        "id": 18,
+        "plate_number": "NO PLATE",
+        "confidence": 0.8,
+        "vehicle_info": "White Maruti Suzuki WagonR",
+        "timestamp": 4.6046000000000005,
+        "video_id": 1,
+        "track_id": 244
+    },
+    {
+        "id": 19,
+        "plate_number": "NO PLATE",
+        "confidence": 0.9,
+        "vehicle_info": "Dark Grey/Black Unknown",
+        "timestamp": 4.1041,
+        "video_id": 1,
+        "track_id": 126
+    },
+    {
+        "id": 20,
+        "plate_number": "NO PLATE",
+        "confidence": 0.95,
+        "vehicle_info": "White Honda Activa",
+        "timestamp": 5.5055000000000005,
+        "video_id": 1,
+        "track_id": 251
+    },
+    {
+        "id": 21,
+        "plate_number": "DL11S 03385",
+        "confidence": 0.95,
+        "vehicle_info": "Red Honda Activa",
+        "timestamp": 5.9059,
+        "video_id": 1,
+        "track_id": 267
+    },
+    {
+        "id": 22,
+        "plate_number": "NO PLATE",
+        "confidence": 0.85,
+        "vehicle_info": "Green and Yellow Bajaj Auto Rickshaw",
+        "timestamp": 6.3063,
+        "video_id": 1,
+        "track_id": 307
+    },
+    {
+        "id": 23,
+        "plate_number": "DL1RC 2289",
+        "confidence": 0.95,
+        "vehicle_info": "Green and Yellow Bajaj Auto Rickshaw",
+        "timestamp": 6.7067000000000005,
+        "video_id": 1,
+        "track_id": 294
+    },
+    {
+        "id": 24,
+        "plate_number": "NO PLATE",
+        "confidence": 0.7,
+        "vehicle_info": "White Unknown",
+        "timestamp": 6.6066,
+        "video_id": 1,
+        "track_id": 299
+    },
+    {
+        "id": 25,
+        "plate_number": "NO PLATE",
+        "confidence": 0.9,
+        "vehicle_info": "Green and Yellow Bajaj Auto Rickshaw",
+        "timestamp": 5.8058000000000005,
+        "video_id": 1,
+        "track_id": 104
+    },
+    {
+        "id": 26,
+        "plate_number": "DL1LT 3968",
+        "confidence": 0.95,
+        "vehicle_info": "Red TATA Truck",
+        "timestamp": 4.7047,
+        "video_id": 1,
+        "track_id": 254
+    },
+    {
+        "id": 27,
+        "plate_number": "NO PLATE",
+        "confidence": 0.9,
+        "vehicle_info": "Green and Yellow Bajaj Auto Rickshaw",
+        "timestamp": 6.6066,
+        "video_id": 1,
+        "track_id": 315
+    },
+    {
+        "id": 28,
+        "plate_number": "NO PLATE",
+        "confidence": 0.9,
+        "vehicle_info": "Red Commercial Truck",
+        "timestamp": 7.4074,
+        "video_id": 1,
+        "track_id": 345
+    },
+    {
+        "id": 29,
+        "plate_number": "NO PLATE",
+        "confidence": 0.8,
+        "vehicle_info": "Black Commuter Motorcycle",
+        "timestamp": 7.6076,
+        "video_id": 1,
+        "track_id": 304
+    },
+    {
+        "id": 30,
+        "plate_number": "NO PLATE",
+        "confidence": 0.6,
+        "vehicle_info": "Dark Grey Scooter",
+        "timestamp": 6.7067000000000005,
+        "video_id": 1,
+        "track_id": 321
+    },
+    {
+        "id": 31,
+        "plate_number": "NO PLATE",
+        "confidence": 0.9,
+        "vehicle_info": "Black Hero Glamour",
+        "timestamp": 7.4074,
+        "video_id": 1,
+        "track_id": 343
+    },
+    {
+        "id": 32,
+        "plate_number": "NO PLATE",
+        "confidence": 0.9,
+        "vehicle_info": "Black Hero Glamour",
+        "timestamp": 7.6076,
+        "video_id": 1,
+        "track_id": 298
+    },
+    {
+        "id": 33,
+        "plate_number": "NO PLATE",
+        "confidence": 0.8,
+        "vehicle_info": "Grey Honda Dio",
+        "timestamp": 8.5085,
+        "video_id": 1,
+        "track_id": 366
+    },
+    {
+        "id": 34,
+        "plate_number": "DL 3SCG 166",
+        "confidence": 0.95,
+        "vehicle_info": "Black Hero Glamour",
+        "timestamp": 10.8108,
+        "video_id": 1,
+        "track_id": 250
+    },
+    {
+        "id": 35,
+        "plate_number": "NO PLATE",
+        "confidence": 0.4,
+        "vehicle_info": "Unknown Unknown",
+        "timestamp": 9.1091,
+        "video_id": 1,
+        "track_id": 385
+    },
+    {
+        "id": 36,
+        "plate_number": "NO PLATE",
+        "confidence": 0.95,
+        "vehicle_info": "White Honda Activa",
+        "timestamp": 9.009,
+        "video_id": 1,
+        "track_id": 39
+    },
+    {
+        "id": 37,
+        "plate_number": "NO PLATE",
+        "confidence": 0.9,
+        "vehicle_info": "Black Motorcycle",
+        "timestamp": 9.4094,
+        "video_id": 1,
+        "track_id": 412
+    },
+    {
+        "id": 38,
+        "plate_number": "NO PLATE",
+        "confidence": 0.7,
+        "vehicle_info": "Brown Bicycle",
+        "timestamp": 9.809800000000001,
+        "video_id": 1,
+        "track_id": 423
+    },
+    {
+        "id": 39,
+        "plate_number": "NO PLATE",
+        "confidence": 0.9,
+        "vehicle_info": "Dark Grey Honda Dio",
+        "timestamp": 10.110100000000001,
+        "video_id": 1,
+        "track_id": 326
+    },
+    {
+        "id": 40,
+        "plate_number": "NO PLATE",
+        "confidence": 0.95,
+        "vehicle_info": "White Honda Activa",
+        "timestamp": 10.3103,
+        "video_id": 1,
+        "track_id": 386
+    },
+    {
+        "id": 41,
+        "plate_number": "NO PLATE",
+        "confidence": 0.9,
+        "vehicle_info": "Green and Yellow Bajaj RE",
+        "timestamp": 9.809800000000001,
+        "video_id": 1,
+        "track_id": 427
+    },
+    {
+        "id": 42,
+        "plate_number": "NO PLATE",
+        "confidence": 0.85,
+        "vehicle_info": "Silver Scooter",
+        "timestamp": 11.1111,
+        "video_id": 1,
+        "track_id": 466
+    },
+    {
+        "id": 43,
+        "plate_number": "NO PLATE",
+        "confidence": 0.95,
+        "vehicle_info": "Black Honda Activa",
+        "timestamp": 11.8118,
+        "video_id": 1,
+        "track_id": 413
+    },
+    {
+        "id": 44,
+        "plate_number": "NO PLATE",
+        "confidence": 0.9,
+        "vehicle_info": "Green and Yellow Bajaj RE",
+        "timestamp": 12.4124,
+        "video_id": 1,
+        "track_id": 465
+    },
+    {
+        "id": 45,
+        "plate_number": "DL1RAQ3932",
+        "confidence": 0.95,
+        "vehicle_info": "Green and Yellow Bajaj RE",
+        "timestamp": 13.3133,
+        "video_id": 1,
+        "track_id": 480
+    },
+    {
+        "id": 46,
+        "plate_number": "NO PLATE",
+        "confidence": 0.7,
+        "vehicle_info": "White SUV",
+        "timestamp": 13.6136,
+        "video_id": 1,
+        "track_id": 494
+    },
+    {
+        "id": 47,
+        "plate_number": "DL13CA2927",
+        "confidence": 1.0,
+        "vehicle_info": "White Maruti Swift",
+        "timestamp": 13.8138,
+        "video_id": 1,
+        "track_id": 438
+    },
+    {
+        "id": 48,
+        "plate_number": "NO PLATE",
+        "confidence": 0.9,
+        "vehicle_info": "White Maruti Swift",
+        "timestamp": 14.2142,
+        "video_id": 1,
+        "track_id": 497
+    },
+    {
+        "id": 49,
+        "plate_number": "NO PLATE",
+        "confidence": 1.0,
+        "vehicle_info": "Green and Yellow Bajaj RE",
+        "timestamp": 13.9139,
+        "video_id": 1,
+        "track_id": 499
+    },
+    {
+        "id": 50,
+        "plate_number": "DL1P M479",
+        "confidence": 1.0,
+        "vehicle_info": "Red Honda Activa",
+        "timestamp": 8.4084,
+        "video_id": 1,
+        "track_id": 357
+    },
+    {
+        "id": 51,
+        "plate_number": "DL13CB4697",
+        "confidence": 1.0,
+        "vehicle_info": "Dark Grey Hyundai Aura",
+        "timestamp": 14.614600000000001,
+        "video_id": 1,
+        "track_id": 485
+    },
+    {
+        "id": 52,
+        "plate_number": "NO PLATE",
+        "confidence": 1.0,
+        "vehicle_info": "Green and Yellow Bajaj RE",
+        "timestamp": 15.1151,
+        "video_id": 1,
+        "track_id": 516
+    },
+    {
+        "id": 53,
+        "plate_number": "NO PLATE",
+        "confidence": 1.0,
+        "vehicle_info": "Green and Yellow Bajaj RE",
+        "timestamp": 15.2152,
+        "video_id": 1,
+        "track_id": 490
+    },
+    {
+        "id": 54,
+        "plate_number": "DL13CA2927",
+        "confidence": 1.0,
+        "vehicle_info": "White Maruti Swift",
+        "timestamp": 15.5155,
+        "video_id": 1,
+        "track_id": 514
+    }
+]

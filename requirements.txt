@@ -1,0 +1,22 @@
+fastapi[all]
+sqlalchemy
+psycopg2-binary
+ultralytics
+easyocr
+opencv-python
+python-dotenv
+pydantic-settings
+uvicorn
+python-multipart
+torch
+torchvision
+torchaudio
+python-jose[cryptography]
+passlib[bcrypt]
+# paddlepaddle-gpu # Not compatible with Python 3.13 yet. Code falls back to EasyOCR.
+# paddleocr
+celery
+redis
+decord
+ffmpeg-python
+google-generativeai

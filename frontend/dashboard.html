@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | ALPR Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Auth Guard -->
+    <script>
+        if (!localStorage.getItem('token')) {
+            window.location.href = 'auth.html';
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #0b0f1a;
+        }
+
+        .sidebar {
+            background: #111827;
+        }
+
+        .card {
+            background: #1f2937;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .glass-nav {
+            background: rgba(17, 24, 39, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .table-row:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 10px;
+        }
+
+        .glass-nav {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px border rgba(255, 255, 255, 0.05);
+        }
+
+        .premium-card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -15px rgba(59, 130, 246, 0.15);
+        }
+
+        .glow-blue {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Custom scrollbar for premium feel */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.2);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(59, 130, 246, 0.4);
+        }
+    </style>
+</head>
+
+<body class="text-slate-300">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 sidebar flex-shrink-0 flex flex-col border-r border-white/5">
+            <div class="p-6">
+                <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+                    <span class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-camera text-sm"></i>
+                    </span>
+                    ALPR Pro
+                </h1>
+            </div>
+            <nav class="flex-1 px-4 space-y-2 mt-4">
+                <button id="nav-dashboard"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-white bg-blue-600/10 rounded-xl border border-blue-500/20">
+                    <i class="fas fa-chart-pie"></i>
+                    Dashboard
+                </button>
+                <button id="nav-videos"
+                    class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl transition-all">
+                    <i class="fas fa-video"></i>
+                    Videos
+                </button>
+                <button id="nav-detections"
+                    class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl transition-all">
+                    <i class="fas fa-table"></i>
+                    Detections
+                </button>
+                <button id="nav-monitor"
+                    class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl transition-all">
+                    <i class="fas fa-server"></i>
+                    System Status
+                </button>
+                <button id="nav-agents"
+                    class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl transition-all">
+                    <i class="fas fa-robot"></i>
+                    Agent Factory
+                </button>
+            </nav>
+            <div class="p-4 mt-auto mb-4">
+                <button id="logout-btn"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-400/10 rounded-xl transition-all">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#0b0f1a]">
+            <!-- Header -->
+            <header class="glass-nav h-16 flex items-center justify-between px-8 z-10">
+                <h2 id="page-title" class="text-lg font-semibold text-white">System Dashboard</h2>
+                <div class="flex items-center gap-4">
+                    <span id="user-email" class="text-sm text-slate-400"></span>
+                    <div
+                        class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white">
+                        U
+                    </div>
+                </div>
+            </header>
+
+            <!-- Scrollable Content -->
+            <div class="flex-1 overflow-y-auto p-8" id="content-area">
+                <!-- Dashboard Statistics & System Health -->
+                <div id="dashboard-view" class="space-y-8">
+                    <!-- System Health Banner -->
+                    <div
+                        class="card p-4 rounded-xl border-l-4 border-blue-500 flex items-center justify-between bg-blue-500/5">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+                                <i class="fas fa-shield-halved text-blue-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold text-white">System Readiness Check</h4>
+                                <p class="text-[10px] text-slate-500">Storage: <span id="health-disk"
+                                        class="text-emerald-400">SCANNING...</span> | GPU: <span id="health-gpu"
+                                        class="text-emerald-400">SCANNING...</span> | ROI: <span id="health-roi"
+                                        class="text-blue-400">SCANNING...</span></p>
+                            </div>
+                        </div>
+                        <button onclick="runSystemCheck()"
+                            class="text-xs px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/5 transition-all">Re-Scan</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="card p-6 rounded-2xl group hover:border-blue-500/30 transition-all">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-slate-400 text-sm font-medium uppercase tracking-wider">Total
+                                    Videos</span>
+                                <i class="fas fa-film text-blue-400 group-hover:scale-110 transition-transform"></i>
+                            </div>
+                            <div class="text-3xl font-bold text-white" id="stat-videos">0</div>
+                        </div>
+                        <div class="card p-6 rounded-2xl group hover:border-green-500/30 transition-all">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-slate-400 text-sm font-medium uppercase tracking-wider">Total
+                                    Detections</span>
+                                <i class="fas fa-car text-green-400 group-hover:scale-110 transition-transform"></i>
+                            </div>
+                            <div class="text-3xl font-bold text-white" id="stat-detections">0</div>
+                        </div>
+                        <div class="card p-6 rounded-2xl group hover:border-emerald-500/30 transition-all">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-slate-400 text-sm font-medium uppercase tracking-wider">AI
+                                    Engines</span>
+                                <i
+                                    class="fas fa-microchip text-emerald-400 group-hover:scale-110 transition-transform"></i>
+                            </div>
+                            <div class="text-3xl font-bold text-emerald-400" id="current-ai-info">Active v2.2</div>
+                        </div>
+                    </div>
+
+                    <!-- Upload & Active Tasks -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="card p-8 rounded-2xl">
+                            <h3 class="text-xl font-bold text-white mb-2">Analyze New Footage</h3>
+                            <p class="text-xs text-slate-500 mb-6 font-medium">ROI Mask <span
+                                    class="text-blue-400">roi_mask.png</span> will be applied to detections.</p>
+                            <div id="drop-zone"
+                                class="border-2 border-dashed border-slate-700/50 rounded-2xl p-10 text-center hover:border-blue-500/50 hover:bg-blue-500/5 transition-all cursor-pointer bg-slate-800/20">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-slate-500 mb-4"></i>
+                                <p class="text-slate-400">Drag and drop CCTV video or click to select</p>
+                                <p class="text-[10px] text-slate-600 mt-2 uppercase tracking-widest font-bold">23-Hour
+                                    MP4 / AVI / MKV</p>
+                                <input type="file" id="video-input" class="hidden" accept="video/*">
+                            </div>
+                            <div id="upload-progress" class="mt-6 hidden">
+                                <div class="w-full bg-slate-800 rounded-full h-1 overflow-hidden">
+                                    <div id="progress-bar" class="bg-blue-600 h-full w-0 transition-all duration-300">
+                                    </div>
+                                </div>
+                                <p
+                                    class="text-[10px] text-slate-500 mt-2 text-center uppercase font-bold tracking-tight">
+                                    Starting Parallel Analysis...</p>
+                            </div>
+                        </div>
+
+                        <div class="card p-8 rounded-2xl overflow-hidden flex flex-col">
+                            <h3 class="text-xl font-bold text-white mb-6">Master Tasks</h3>
+                            <div id="tasks-list" class="space-y-4 flex-1 overflow-y-auto pr-2">
+                                <p class="text-slate-500 text-sm italic">No active background tasks</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Videos View -->
+                <div id="videos-view" class="hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="videos-grid">
+                        <!-- Videos dynamically loaded -->
+                    </div>
+                </div>
+
+                <!-- Detections View (v2.4: Rich Explorer) -->
+                <div id="detections-view" class="hidden space-y-6">
+                    <!-- Advanced Filter Suite -->
+                    <div class="card p-6 rounded-3xl border border-white/5 bg-slate-800/20">
+                        <div class="flex flex-wrap gap-6 items-end">
+                            <div class="flex-1 min-w-[200px]">
+                                <label
+                                    class="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">Search
+                                    Plate / Vehicle</label>
+                                <div class="relative">
+                                    <i
+                                        class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                                    <input type="text" id="filter-plate" placeholder="ABC-123 or 'Red Audi'..."
+                                        class="w-full bg-slate-900 border border-white/5 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:ring-1 ring-blue-500 transition-all outline-none">
+                                </div>
+                            </div>
+
+                            <div class="w-48">
+                                <label
+                                    class="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">Min
+                                    Confidence</label>
+                                <div class="flex items-center gap-3">
+                                    <input type="range" id="filter-conf" min="0" max="100" value="0"
+                                        class="flex-1 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                                    <span id="filter-conf-val" class="text-xs font-mono text-blue-400 w-8">0%</span>
+                                </div>
+                            </div>
+
+                            <div class="w-48">
+                                <label
+                                    class="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">AI
+                                    Status</label>
+                                <select id="filter-status"
+                                    class="w-full bg-slate-900 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-slate-300 outline-none focus:ring-1 ring-blue-500">
+                                    <option value="">All Detections</option>
+                                    <option value="success">Verified (AI)</option>
+                                    <option value="none">Local Only</option>
+                                    <option value="failed">Verification Failed</option>
+                                </select>
+                            </div>
+
+                            <button id="apply-filter"
+                                class="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-blue-500/20">
+                                <i class="fas fa-filter mr-2"></i> Apply Filters
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Rich Forensic List -->
+                    <div id="detections-list" class="space-y-4">
+                        <!-- Rich cards dynamically loaded here -->
+                        <div class="text-center py-20 opacity-20">
+                            <i class="fas fa-database text-6xl mb-4"></i>
+                            <p class="text-sm">Initialize forensic scan to view detections</p>
+                        </div>
+                    </div>
+
+                    <!-- Pagination Controls -->
+                    <div id="detections-pagination" class="hidden py-6 border-t border-white/5">
+                        <!-- Injected by app.js -->
+                    </div>
+                </div>
+
+                <!-- System Monitor View -->
+                <div id="monitor-view" class="hidden space-y-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Processor Card -->
+                        <div class="card p-8 rounded-3xl relative overflow-hidden">
+                            <div class="absolute top-0 right-0 p-6 opacity-10 text-6xl"><i class="fas fa-microchip"></i>
+                            </div>
+                            <h3 class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">Processor (CPU)
+                            </h3>
+                            <h4 id="mon-cpu-name" class="text-2xl font-bold text-white mb-2">SCANNING...</h4>
+                            <div class="flex items-center gap-4 mt-6">
+                                <div class="flex-1">
+                                    <div class="flex justify-between text-[10px] font-bold uppercase mb-1">
+                                        <span>Current Load</span>
+                                        <span id="mon-cpu-usage">0%</span>
+                                    </div>
+                                    <div class="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                                        <div id="mon-cpu-bar" class="h-full bg-blue-500 transition-all duration-500"
+                                            style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Graphics Card -->
+                        <div class="card p-8 rounded-3xl relative overflow-hidden">
+                            <div class="absolute top-0 right-0 p-6 opacity-10 text-6xl"><i class="fas fa-bolt"></i>
+                            </div>
+                            <h3 class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">Graphics (GPU)
+                            </h3>
+                            <h4 id="mon-gpu-name" class="text-2xl font-bold text-white mb-2">SCANNING...</h4>
+                            <div class="flex items-center gap-3 mt-4">
+                                <span id="mon-gpu-caps"
+                                    class="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-[10px] font-black rounded-full border border-emerald-500/20">AI-ACCELERATED</span>
+                                <span id="mon-os" class="text-[10px] text-slate-500 font-bold uppercase"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <!-- Memory Card -->
+                        <div class="card p-6 rounded-3xl">
+                            <div class="flex items-center justify-between mb-6">
+                                <span class="text-[10px] font-black uppercase text-slate-500 tracking-tighter">System
+                                    Memory</span>
+                                <i class="fas fa-memory text-blue-400"></i>
+                            </div>
+                            <div class="text-3xl font-bold text-white mb-1" id="mon-mem-total">0 GB</div>
+                            <p class="text-[10px] text-slate-500 font-bold uppercase mb-4">Total Physical RAM</p>
+                            <div class="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+                                <div id="mon-mem-bar" class="h-full bg-blue-400 transition-all duration-700"
+                                    style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Storage Card -->
+                        <div class="card p-6 rounded-3xl">
+                            <div class="flex items-center justify-between mb-6">
+                                <span class="text-[10px] font-black uppercase text-slate-500 tracking-tighter">Primary
+                                    Storage</span>
+                                <i class="fas fa-hard-drive text-emerald-400"></i>
+                            </div>
+                            <div class="text-lg font-bold text-white mb-1 truncate" id="mon-disk-name">SCANNING...</div>
+                            <p class="text-[10px] text-slate-500 font-bold uppercase mb-4" id="mon-disk-health">
+                                Optimized for CUDA I/O</p>
+                            <div class="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+                                <div id="mon-disk-bar" class="h-full bg-emerald-400 transition-all duration-700"
+                                    style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Services Card -->
+                        <div class="card p-6 rounded-3xl">
+                            <div class="flex items-center justify-between mb-6">
+                                <span class="text-[10px] font-black uppercase text-slate-500 tracking-tighter">Service
+                                    Matrix</span>
+                                <i class="fas fa-layer-group text-purple-400"></i>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold text-slate-400">REDIS DB</span>
+                                    <span id="stat-redis"
+                                        class="text-[9px] font-black px-2 py-0.5 rounded bg-slate-800 text-slate-500">CHECKING</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold text-slate-400">GEMINI CLOUD</span>
+                                    <span id="stat-gemini"
+                                        class="text-[9px] font-black px-2 py-0.5 rounded bg-slate-800 text-slate-500">CHECKING</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold text-slate-400">ROI MASK</span>
+                                    <span id="stat-roi"
+                                        class="text-[9px] font-black px-2 py-0.5 rounded bg-slate-800 text-slate-500">CHECKING</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Agent Factory View -->
+                <div id="agents-view" class="hidden space-y-8">
+                    <!-- Agent Status Listing -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="agents-grid">
+                        <!-- Agent Cards Dynamic -->
+                        <div class="card p-6 rounded-2xl flex flex-col gap-4 border-l-4 border-blue-500">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-bold text-white text-sm uppercase">Detection Agent</h4>
+                                <span
+                                    class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-bold">ACTIVE</span>
+                            </div>
+                            <p class="text-[10px] text-slate-500">Handles real-time YOLOv8-seg tracking and ByteTrack
+                                unique ID assignment.</p>
+                            <div class="flex items-center gap-2">
+                                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                <span class="text-xs text-emerald-500 font-mono">15.4ms / frame</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Traffic Insights (v2.3.2) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 card p-6 rounded-3xl border border-white/5 bg-slate-800/20">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                                    <i class="fas fa-chart-line text-blue-500"></i>
+                                    Traffic Density Timeline
+                                </h3>
+                                <span class="text-[10px] text-slate-500 font-mono" id="analytics-updated">-</span>
+                            </div>
+                            <div class="h-64 relative">
+                                <canvas id="trafficChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div
+                                class="card p-6 rounded-3xl border border-white/5 bg-blue-600/10 hover:bg-blue-600/20 transition-all group">
+                                <p class="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1">Peak
+                                    Density</p>
+                                <h4 class="text-3xl font-bold text-white group-hover:scale-105 transition-transform"
+                                    id="peak-density">0</h4>
+                                <p class="text-[10px] text-slate-500 mt-2">Max vehicles in a single frame</p>
+                            </div>
+                            <div
+                                class="card p-6 rounded-3xl border border-white/5 bg-emerald-600/10 hover:bg-emerald-600/20 transition-all group">
+                                <p class="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">Unique
+                                    Detections</p>
+                                <h4 class="text-3xl font-bold text-white group-hover:scale-105 transition-transform"
+                                    id="unique-vehicles">0</h4>
+                                <p class="text-[10px] text-slate-500 mt-2">De-duplicated vehicle count</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Agent Settings Panel -->
+                    <div class="card p-8 rounded-3xl border border-white/5 bg-slate-800/20">
+                        <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-3">
+                            <i class="fas fa-sliders-h text-blue-500"></i>
+                            Agent Configuration (v2.3)
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                            <div class="space-y-6">
+                                <div>
+                                    <label
+                                        class="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-3">AI
+                                        Cluster Sensitivity</label>
+                                    <div class="flex gap-2 p-1 bg-slate-900 rounded-xl border border-white/5">
+                                        <button onclick="setSensitivity('LOW')"
+                                            class="flex-1 py-2 text-xs font-bold rounded-lg transition-all"
+                                            id="sens-LOW">LOW</button>
+                                        <button onclick="setSensitivity('BALANCED')"
+                                            class="flex-1 py-2 text-xs font-bold rounded-lg transition-all"
+                                            id="sens-BALANCED">BALANCED</button>
+                                        <button onclick="setSensitivity('HIGH')"
+                                            class="flex-1 py-2 text-xs font-bold rounded-lg bg-blue-600 text-white shadow-lg shadow-blue-500/20"
+                                            id="sens-HIGH">HIGH</button>
+                                    </div>
+                                    <p class="text-[10px] text-slate-600 mt-2 italic">High sensitivity lowers YOLO
+                                        threshold and increases ByteTrack persistence.</p>
+                                </div>
+
+                                <div>
+                                    <label
+                                        class="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">Collage
+                                        Batch Size</label>
+                                    <input type="range" id="setting-batch-size" min="5" max="25" step="5" value="10"
+                                        class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                                    <div class="flex justify-between text-[10px] font-bold text-slate-500 mt-1">
+                                        <span>5 DEEP</span>
+                                        <span id="batch-size-val" class="text-blue-400">10 CROPS / CALL</span>
+                                        <span>25 DEEP</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-6">
+                                <div>
+                                    <label
+                                        class="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">Filter
+                                        Agent Persistence</label>
+                                    <select id="setting-persistence"
+                                        class="w-full bg-slate-900 border border-white/5 rounded-xl px-4 py-3 text-sm text-slate-300 focus:ring-1 ring-blue-500 transition-all outline-none">
+                                        <option value="5">Rapid (5 Frames)</option>
+                                        <option value="15" selected>Standard (15 Frames)</option>
+                                        <option value="30">Persistent (30 Frames)</option>
+                                    </select>
+                                    <p class="text-[10px] text-slate-600 mt-2 italic">Prevents weak/far detections from
+                                        triggering Gemini API calls.</p>
+                                </div>
+
+                                <div class="pt-4">
+                                    <button onclick="saveAgentSettings()"
+                                        class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-blue-600/20 flex items-center justify-center gap-2">
+                                        <i class="fas fa-check-circle"></i> SAVE & SYNC AGENTS
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logs Console Modal (v2.3.3) -->
+                <div id="logs-modal"
+                    class="fixed inset-0 z-[100] hidden bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 lg:p-10">
+                    <div
+                        class="bg-slate-900 w-full max-w-5xl h-full max-h-[80vh] rounded-3xl border border-white/10 flex flex-col shadow-2xl overflow-hidden">
+                        <!-- Modal Header -->
+                        <div class="p-6 border-b border-white/5 flex items-center justify-between bg-slate-900/50">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-blue-600/20 flex items-center justify-center">
+                                    <i class="fas fa-terminal text-blue-400"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-white font-bold" id="logs-title">System Logs</h3>
+                                    <p class="text-[10px] text-slate-500 uppercase tracking-widest font-black"
+                                        id="logs-subtitle">Real-time Stream Connected</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span
+                                    class="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 text-emerald-400 text-[10px] rounded-full font-bold">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    LIVE
+                                </span>
+                                <button onclick="closeLogsModal()"
+                                    class="w-8 h-8 rounded-full hover:bg-white/5 flex items-center justify-center text-slate-400 transition-all">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Logs Body -->
+                        <div id="logs-container"
+                            class="flex-1 overflow-y-auto p-6 font-mono text-xs space-y-2 bg-black/20">
+                            <!-- Logs will stream here -->
+                            <div class="text-slate-500 italic opacity-50">Initializing log sequence...</div>
+                        </div>
+
+                        <!-- Modal Footer -->
+                        <div class="p-4 border-t border-white/5 bg-slate-900/50 flex items-center justify-between">
+                            <div class="flex gap-4 items-center">
+                                <select id="logs-agent-filter" onchange="refreshCurrentLogs()"
+                                    class="bg-slate-800 text-[10px] font-bold text-white px-2 py-1 rounded border border-white/10 outline-none">
+                                    <option value="">ALL AGENTS</option>
+                                    <option value="DETECTOR">DETECTOR</option>
+                                    <option value="CAPTURER">CAPTURER</option>
+                                    <option value="GEMINI">GEMINI</option>
+                                    <option value="QC">QC</option>
+                                    <option value="SYSTEM">SYSTEM</option>
+                                </select>
+                                <button onclick="clearLogs()"
+                                    class="text-[10px] font-bold text-slate-500 hover:text-white transition-all uppercase">Clear</button>
+                            </div>
+                            <div class="text-[10px] text-slate-600 font-bold" id="logs-count">0 EVENTS CAPTURED</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="video-modal" class="fixed inset-0 bg-black/90 z-50 p-6 hidden flex flex-col items-center justify-center">
+        <div
+            class="w-full max-w-6xl h-[80vh] bg-[#111827] rounded-3xl overflow-hidden border border-white/10 flex shadow-2xl relative">
+            <button onclick="closeVideoModal()"
+                class="absolute top-6 right-6 text-white/50 hover:text-white z-50 bg-black/20 w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md transition-all">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+
+            <!-- Player Section -->
+            <div class="flex-[2] flex flex-col bg-black">
+                <video id="player" controls class="w-full h-full object-contain"></video>
+            </div>
+
+            <!-- Detections List (Jump to Detection) -->
+            <div class="flex-1 border-l border-white/5 flex flex-col bg-[#0b0f1a]">
+                <div class="p-6 border-b border-white/5">
+                    <h4 id="modal-video-title" class="text-lg font-bold text-white truncate mb-1"></h4>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Detection Timeline</p>
+                </div>
+                <div id="jump-list" class="flex-1 overflow-y-auto p-4 space-y-2">
+                    <!-- Jump links will be inserted here -->
+                    <div class="text-center py-10 opacity-20">
+                        <i class="fas fa-list text-3xl mb-2"></i>
+                        <p class="text-xs">No detections found</p>
+                    </div>
+                </div>
+                <div class="p-6 bg-white/5">
+                    <button onclick="downloadReport()"
+                        class="w-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-3 rounded-xl transition-all shadow-lg shadow-blue-500/20">
+                        <i class="fas fa-download mr-2"></i> EXPORT DETECTIONS (JSON)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analysis Report Modal (v3.1 Audit Machine) -->
+    <div id="analysis-modal"
+        class="hidden fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-xl flex items-center justify-center p-4 lg:p-10">
+        <div
+            class="bg-slate-900 border border-white/5 w-full max-w-6xl h-full max-h-[90vh] rounded-[2rem] shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-500">
+
+            <!-- Modal Header -->
+            <div
+                class="px-8 py-6 border-b border-white/5 flex items-center justify-between bg-slate-900/50 backdrop-blur-md">
+                <div class="flex items-center gap-5">
+                    <div
+                        class="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center shadow-2xl shadow-blue-500/20">
+                        <i class="fas fa-file-invoice text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-black text-white tracking-widest uppercase mb-1">Forensic Audit Machine
+                            <span class="text-blue-500 text-xs ml-2">v3.1</span></h2>
+                        <div
+                            class="flex items-center gap-3 text-[10px] font-bold text-slate-500 uppercase tracking-tighter">
+                            <span id="analysis-video-name">REPORT_FILE_NAME.MP4</span>
+                            <span class="w-1 h-1 rounded-full bg-slate-700"></span>
+                            <span id="analysis-processed-at">GENERATING...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="window.print()"
+                        class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-[10px] font-black uppercase transition-all flex items-center gap-2">
+                        <i class="fas fa-print"></i> EXPORT TO PDF
+                    </button>
+                    <button onclick="closeAnalysisModal()"
+                        class="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center transition-all bg-black/20 text-slate-400">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Content (Scrollable) -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar">
+                <!-- Data Blocks -->
+                <div class="p-8 space-y-12">
+
+                    <!-- 1. EXECUTIVE SUMMARY SECTION -->
+                    <section>
+                        <div class="flex items-center gap-4 mb-8">
+                            <div class="h-px flex-1 bg-gradient-to-r from-transparent to-white/5"></div>
+                            <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Executive
+                                Summary</h3>
+                            <div class="h-px flex-1 bg-gradient-to-l from-transparent to-white/5"></div>
+                        </div>
+
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                            <!-- Macro Metric 1 -->
+                            <div
+                                class="card p-6 rounded-3xl border border-white/5 bg-blue-600/5 relative overflow-hidden group">
+                                <i
+                                    class="fas fa-car absolute -bottom-4 -right-4 text-7xl text-blue-600/5 group-hover:scale-120 transition-transform duration-700"></i>
+                                <p class="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-2">Unique
+                                    Vehicles</p>
+                                <h4 class="text-4xl font-black text-white" id="stat-total-vehicles">0</h4>
+                                <p class="text-[9px] text-slate-500 mt-2 font-bold uppercase">Consensus Deduplicated</p>
+                            </div>
+
+                            <!-- Macro Metric 2 -->
+                            <div
+                                class="card p-6 rounded-3xl border border-white/5 bg-emerald-600/5 relative overflow-hidden group">
+                                <i
+                                    class="fas fa-camera absolute -bottom-4 -right-4 text-7xl text-emerald-600/5 group-hover:scale-120 transition-transform duration-700"></i>
+                                <p class="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2">
+                                    Forensic Snaps</p>
+                                <h4 class="text-4xl font-black text-white" id="stat-total-snaps">0</h4>
+                                <p class="text-[9px] text-slate-500 mt-2 font-bold uppercase" id="stat-batch-count">0
+                                    GRID COLLAGES</p>
+                            </div>
+
+                            <!-- Macro Metric 3 -->
+                            <div
+                                class="card p-6 rounded-3xl border border-white/5 bg-purple-600/5 relative overflow-hidden group">
+                                <i
+                                    class="fas fa-bolt absolute -bottom-4 -right-4 text-7xl text-purple-600/5 group-hover:scale-120 transition-transform duration-700"></i>
+                                <p class="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-2">Process
+                                    Efficiency</p>
+                                <h4 class="text-4xl font-black text-white" id="stat-avg-fps">0.0</h4>
+                                <p class="text-[9px] text-slate-500 mt-2 font-bold uppercase tracking-tight"
+                                    id="stat-total-duration">0.0s TOTAL DURATION</p>
+                            </div>
+
+                            <!-- Macro Metric 4 -->
+                            <div
+                                class="card p-6 rounded-3xl border border-white/5 bg-slate-800/20 relative overflow-hidden group">
+                                <i
+                                    class="fas fa-microchip absolute -bottom-4 -right-4 text-7xl text-slate-600/5 group-hover:scale-120 transition-transform duration-700"></i>
+                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Agent
+                                    Performance</p>
+                                <h4 class="text-4xl font-black text-white" id="stat-batch-success">0%</h4>
+                                <p class="text-[9px] text-slate-500 mt-2 font-bold uppercase">Capture Rate (v3.0)</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 2. TRAFFIC INTELLIGENCE SECTION -->
+                    <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <!-- Vehicle Mix -->
+                        <div class="lg:col-span-1 card p-8 rounded-3xl bg-slate-900/40 border border-white/5">
+                            <h3
+                                class="text-xs font-black text-white uppercase tracking-widest mb-6 flex items-center gap-2">
+                                <i class="fas fa-pie-chart text-blue-500"></i> Vehicle Mix
+                            </h3>
+                            <div class="h-48 flex items-center justify-center mb-6">
+                                <canvas id="reportVehicleMixChart"></canvas>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3" id="analysis-stats-grid">
+                                <!-- Dynamic Breakdown -->
+                            </div>
+                        </div>
+
+                        <!-- Density Timeline -->
+                        <div class="lg:col-span-2 card p-8 rounded-3xl bg-slate-900/40 border border-white/5">
+                            <h3
+                                class="text-xs font-black text-white uppercase tracking-widest mb-6 flex items-center gap-2">
+                                <i class="fas fa-wave-square text-emerald-500"></i> Peak Distribution Timeline
+                            </h3>
+                            <div class="h-64">
+                                <canvas id="reportDensityChart"></canvas>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 3. SAFETY COMPLIANCE AUDIT -->
+                    <section>
+                        <h3
+                            class="text-xs font-black text-white uppercase tracking-widest mb-8 flex items-center gap-2">
+                            <i class="fas fa-shield-alt text-red-500"></i> Safety Compliance Ledger
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <!-- Helmet Audit -->
+                            <div
+                                class="card p-6 rounded-3xl bg-emerald-500/5 border border-emerald-500/10 flex items-center gap-6">
+                                <div
+                                    class="w-14 h-14 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-2xl">
+                                    <i class="fas fa-hard-hat"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-[10px] font-black text-emerald-500 uppercase tracking-wider">Helmet
+                                        Users</p>
+                                    <h4 class="text-3xl font-black text-white" id="stat-helmet-count">0</h4>
+                                    <div class="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+                                        <div id="stat-helmet-bar" class="h-full bg-emerald-500" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Violations Audit -->
+                            <div
+                                class="card p-6 rounded-3xl bg-red-500/5 border border-red-500/10 flex items-center gap-6">
+                                <div
+                                    class="w-14 h-14 rounded-2xl bg-red-500/20 flex items-center justify-center text-red-400 text-2xl">
+                                    <i class="fas fa-user-slash"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-[10px] font-black text-red-500 uppercase tracking-wider">No Helmet
+                                        Violations</p>
+                                    <h4 class="text-3xl font-black text-white" id="stat-no-helmet-count">0</h4>
+                                    <div class="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+                                        <div id="stat-no-helmet-bar" class="h-full bg-red-500" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Overload Audit -->
+                            <div
+                                class="card p-6 rounded-3xl bg-orange-500/5 border border-orange-500/10 flex items-center gap-6">
+                                <div
+                                    class="w-14 h-14 rounded-2xl bg-orange-500/20 flex items-center justify-center text-orange-400 text-2xl">
+                                    <i class="fas fa-users-slash"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-[10px] font-black text-orange-500 uppercase tracking-wider">Overload
+                                        Incidents</p>
+                                    <h4 class="text-3xl font-black text-white" id="stat-overload-count">0</h4>
+                                    <p class="text-[9px] text-slate-500 mt-1 uppercase font-bold">Two-Wheeler (3+ PAX)
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 4. AGENTIC LOGS (Forensic Trail) -->
+                    <section class="pb-12">
+                        <h3
+                            class="text-xs font-black text-white uppercase tracking-widest mb-6 flex items-center gap-2">
+                            <i class="fas fa-stream text-blue-500"></i> Agent Forensic Registry
+                        </h3>
+                        <div class="bg-black/40 rounded-3xl border border-white/5 overflow-hidden">
+                            <div
+                                class="p-4 bg-slate-800/30 flex items-center justify-between text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                                <span>Timeline of Intelligence</span>
+                                <span id="stat-total-events">0 EVENTS CAPTURED</span>
+                            </div>
+                            <div id="analysis-logs-container"
+                                class="h-96 overflow-y-auto p-6 font-mono text-[11px] space-y-3 custom-scrollbar">
+                                <div class="text-slate-600 italic">Accessing auditing chain...</div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div
+                class="p-6 bg-slate-900/80 border-t border-white/5 backdrop-blur-md flex items-center justify-between px-10">
+                <div class="flex items-center gap-6">
+                    <div class="flex flex-col">
+                        <p class="text-[8px] font-black text-slate-600 uppercase">Stream Resolution</p>
+                        <p class="text-xs font-bold text-slate-300" id="stat-resolution">1920x1080</p>
+                    </div>
+                    <div class="w-px h-8 bg-white/5"></div>
+                    <div class="flex flex-col">
+                        <p class="text-[8px] font-black text-slate-600 uppercase">Input Frames</p>
+                        <p class="text-xs font-bold text-slate-300" id="stat-total-frames">0</p>
+                    </div>
+                </div>
+                <button onclick="closeAnalysisModal()"
+                    class="px-10 py-3 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white rounded-2xl text-xs font-black transition-all uppercase tracking-[0.2em] border border-red-500/20 shadow-2xl">
+                    Terminate Session</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Logs Modal REMOVED (Duplicate of logs-modal) -->
+
+    <script src="/frontend/js/api.js"></script>
+    <script src="/frontend/js/app.js"></script>
+</body>
+
+</html>
