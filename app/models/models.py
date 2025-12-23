@@ -17,6 +17,11 @@ class RecheckStatus(enum.Enum):
     SKIPPED = "skipped"
     NONE = "none"
 
+class CaseStatus(enum.Enum):
+    OPEN = "open"
+    SOLVED = "solved"
+    FLAGGED_UNCERTAIN = "flagged_uncertain"
+
 class User(Base):
     __tablename__ = "users"
 
@@ -116,6 +121,41 @@ class ProcessingLog(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     video = relationship("Video", backref=backref("logs", cascade="all, delete-orphan"))
+
+class VehicleCase(Base):
+    __tablename__ = "vehicle_cases"
+
+    id = Column(Integer, primary_key=True, index=True)
+    video_id = Column(Integer, ForeignKey("videos.id"))
+    track_id = Column(Integer, index=True)
+    
+    final_plate = Column(String, nullable=True)
+    confidence_score = Column(Float, default=0.0)
+    vehicle_class = Column(String, nullable=True) # CAR, TRUCK, etc.
+    
+    best_frame_path = Column(String, nullable=True) # Path to the clearest raw image
+    enhanced_frame_path = Column(String, nullable=True) # Path to the AI-Restored image (if used)
+    
+    status = Column(Enum(CaseStatus), default=CaseStatus.OPEN)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    video = relationship("Video", backref=backref("cases", cascade="all, delete-orphan"))
+    agent_logs = relationship("AgentLog", back_populates="case", cascade="all, delete-orphan")
+
+class AgentLog(Base):
+    __tablename__ = "agent_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    case_id = Column(Integer, ForeignKey("vehicle_cases.id"))
+    step_number = Column(Integer)
+    agent_name = Column(String) # "Orchestrator", "Enhancer", "Auditor"
+    action_taken = Column(String) # e.g., "INVOKED_SUPER_RES"
+    reasoning = Column(String) # "Raw crop variance below threshold."
+    tool_output = Column(String, nullable=True) # JSON raw data
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    case = relationship("VehicleCase", back_populates="agent_logs")
 
 # Composite Index for faster searching
 Index("idx_detections_plate_ts", VehicleDetection.plate_number, VehicleDetection.timestamp)

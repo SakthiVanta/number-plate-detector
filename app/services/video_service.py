@@ -12,6 +12,7 @@ from app.models.models import Video, VehicleDetection, VideoStatus, DetectionBat
 from app.services.ai_service import ai_service, create_ai_collage
 from app.services.ingest_service import ingest_manager
 from app.services.enhancer_service import enhancer_manager
+from app.agents.orchestrator import orchestrator
 from app.core.config import settings
 import logging
 
@@ -81,8 +82,8 @@ class VideoService:
             unique_plates = {} # v2.3.2 Global De-duplication registry
             
             total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-            print(f">>> [AGENT] Starting v2.3 Analysis. Total Frames: {total_frames}")
-            self._log_event(db, video.id, "SYSTEM", f"Started analysis: {total_frames} frames", is_error=False)
+            print(f">>> [AGENT] Starting v5.0 Master Analysis. Hub-and-Spoke Active. Total Frames: {total_frames}")
+            self._log_event(db, video.id, "SYSTEM", f"Started master v5.0 analysis: {total_frames} frames", is_error=False)
             
             try:
                 while cap.isOpened():
@@ -354,7 +355,7 @@ class VideoService:
         Agent specific: Handles the batching intelligence loop.
         """
         import json  # Defensive import for hot-reload scenarios
-        print(f">>> [AGENT] Batching vehicles: {track_ids}")
+        print(f">>> [ORCHESTRATOR] Triggering Case Review for IDs: {track_ids}")
         # v2.3.8: Use vehicle_crop instead of best_crop (plate crop)
         crops = []
         valid_ids = []
@@ -399,6 +400,14 @@ class VideoService:
         for track_id_batch in track_ids:
             res = next((r for r in results if int(r.get('track_id', -1)) == track_id_batch), None) if results else None
             track = track_data[track_id_batch]
+
+            # v5.0: Invoke Master Orchestrator Agent (The Brain)
+            # This handles case tracking, enhancement decisions, and forensic logging
+            case = orchestrator.process_track(
+                db, video.id, track_id_batch, 
+                track.get('vehicle_crop'), 
+                {"recheck_required": res is not None}
+            )
             
             # v2.9: Extraction logic
             # v3.0: Extraction & Jury Logic

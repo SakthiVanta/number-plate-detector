@@ -602,8 +602,22 @@
             <div class="flex-1 border-l border-white/5 flex flex-col bg-[#0b0f1a]">
                 <div class="p-6 border-b border-white/5">
                     <h4 id="modal-video-title" class="text-lg font-bold text-white truncate mb-1"></h4>
-                    <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Detection Timeline</p>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Forensic Case Feed</p>
                 </div>
+
+                <!-- v5.0: Agent Thought Console (Master View) -->
+                <div class="h-48 border-b border-white/5 bg-black/40 p-4 font-mono text-[10px] flex flex-col">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-blue-500 font-black tracking-widest uppercase animate-pulse">● Agent
+                            Thinking</span>
+                        <span class="text-slate-600">v5.0_CORE</span>
+                    </div>
+                    <div id="agent-thought-console" class="flex-1 overflow-y-auto space-y-1 text-slate-400">
+                        <div class="text-slate-600"># Initializing Hybrid Neuro-Symbolic Hub...</div>
+                        <div class="text-emerald-500/80">> Waiting for track selection...</div>
+                    </div>
+                </div>
+
                 <div id="jump-list" class="flex-1 overflow-y-auto p-4 space-y-2">
                     <!-- Jump links will be inserted here -->
                     <div class="text-center py-10 opacity-20">
@@ -637,7 +651,8 @@
                     </div>
                     <div>
                         <h2 class="text-xl font-black text-white tracking-widest uppercase mb-1">Forensic Audit Machine
-                            <span class="text-blue-500 text-xs ml-2">v3.1</span></h2>
+                            <span class="text-blue-500 text-xs ml-2">v3.1</span>
+                        </h2>
                         <div
                             class="flex items-center gap-3 text-[10px] font-bold text-slate-500 uppercase tracking-tighter">
                             <span id="analysis-video-name">REPORT_FILE_NAME.MP4</span>

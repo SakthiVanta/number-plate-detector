@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 import logging
-from app.api import auth, videos, detections, system, v2_api
+from app.api import auth, videos, detections, system, v2_api, v5_api
 from app.db.session import engine, Base, SessionLocal
 from app.models.models import Video, User
 from jose import jwt
@@ -52,6 +52,7 @@ app.include_router(videos.router, prefix="/api/videos", tags=["Videos"])
 app.include_router(detections.router, prefix="/api/detections", tags=["Detections"])
 app.include_router(system.router, prefix="/api", tags=["System"])
 app.include_router(v2_api.router, prefix="/api/v2", tags=["Agentic v2.3"])
+app.include_router(v5_api.router, prefix="/api/v5", tags=["Master v5.0"])
 
 # Serve Frontend
 app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")

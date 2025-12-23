@@ -572,6 +572,39 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('analysis-modal').classList.add('hidden');
     };
 
+    async function loadAgentThoughts(videoId, trackId) {
+        const consoleElem = document.getElementById('agent-thought-console');
+        if (!consoleElem) return;
+
+        consoleElem.innerHTML = '<div class="text-slate-600 animate-pulse"># Querying Central Case Manager...</div>';
+
+        try {
+            // New v5.0 API Endpoint
+            const response = await api.get(`/v5/cases/${videoId}/${trackId}/logs`);
+            if (!response || response.length === 0) {
+                consoleElem.innerHTML = '<div class="text-slate-600 italic uppercase tracking-widest text-[8px]">> No autonomous agent trail found for this ID</div>';
+                return;
+            }
+
+            consoleElem.innerHTML = response.map(log => {
+                let colorClass = "text-blue-400";
+                if (log.action_taken.includes("ENHANCE")) colorClass = "text-purple-400";
+                if (log.action_taken.includes("SUCCESS")) colorClass = "text-emerald-400";
+
+                return `
+                    <div class="flex gap-2 group">
+                        <span class="text-slate-600 shrink-0">[S${log.step_number}]</span>
+                        <span class="font-black ${colorClass} shrink-0 uppercase">${log.agent_name}</span>
+                        <span class="text-slate-300 flex-1">${log.reasoning}</span>
+                    </div>
+                `;
+            }).join('');
+            consoleElem.scrollTop = consoleElem.scrollHeight;
+        } catch (err) {
+            consoleElem.innerHTML = `<div class="text-red-900">> AUDIT_FETCH_ERROR: ${err.message}</div>`;
+        }
+    }
+
     window.toggleDetectionExpansion = (id) => {
         const panel = document.getElementById(`det-expand-${id}`);
         const chevron = document.getElementById(`det-chevron-${id}`);
@@ -581,6 +614,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             panel.classList.remove('hidden');
             chevron.classList.add('rotate-180');
             card.classList.add('border-blue-500/50', 'bg-slate-800/40');
+
+            // v5.0: Load Forensic Agent Thoughts
+            const d = currentDetections.find(det => det.id === id);
+            if (d && d.track_id) {
+                loadAgentThoughts(d.video_id, d.track_id);
+            }
         } else {
             panel.classList.add('hidden');
             chevron.classList.remove('rotate-180');
