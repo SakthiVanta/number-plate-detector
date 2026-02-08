@@ -47,10 +47,18 @@ class VideoService:
         from app.core.log_handler import db_log_handler
         db_log_handler.set_video_id(video.id)
 
+        # v6.0: Initialize Workflow Tracker for n8n-style visualization
+        from app.services.workflow_tracker import WorkflowTracker
+        tracker = WorkflowTracker(video.id, db)
+        tracker.start_step("VIDEO_UPLOAD")
+        tracker.complete_step("VIDEO_UPLOAD", {"filename": video.filename})
+
         try:
             # v4.0: Video Conditioner Agent (Ingest Layer)
+            tracker.start_step("CONDITIONING")
             self._log_event(db, video.id, "FORMATTER", "Conditioning video stream (CFR/Stabilization/Sharpening)...")
             conditioned_path = ingest_manager.process(video.filepath)
+            tracker.complete_step("CONDITIONING", {"path": conditioned_path})
             
             cap = cv2.VideoCapture(conditioned_path)
             if not cap.isOpened():
@@ -92,6 +100,10 @@ class VideoService:
             db.commit()  # Ensure log is immediately visible
             
             logger.info(f"[SYSTEM] Video {video.id} initialized for processing")
+            
+            # Start detection and tracking phase
+            tracker.start_step("DETECTION")
+            tracker.start_step("TRACKING")
             
             try:
                 while cap.isOpened():
@@ -182,6 +194,10 @@ class VideoService:
                             data['golden_frame_idx'] = current_frame_idx
                             data['best_ts'] = timestamp
                             logger.info(f"[CAPTURE AGENT] Sniped Golden Frame for ID {track_id} (Area: {box_area}, Clarity: {sharpness:.1f})")
+                            # Mark CAPTURE as active on first golden frame
+                            if not hasattr(tracker, '_capture_started'):
+                                tracker.start_step("CAPTURE")
+                                tracker._capture_started = True
  
                         # v3.0: High-Res Plate Capture (for Jury Agent)
                         plates = ai_service.detect_plates(vehicle_crop)

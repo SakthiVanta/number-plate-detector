@@ -70,6 +70,7 @@ app.include_router(v2_api.router, prefix="/api/v2", tags=["Agentic v2.3"])
 app.include_router(v5_api.router, prefix="/api/v5", tags=["Master v5.0"])
 app.include_router(health.router, prefix="/api", tags=["System Health"])
 app.include_router(stream.router, prefix="/api", tags=["Real-time Streaming"])
+app.include_router(agents.router, prefix="/api", tags=["Agent Management"])
 
 # Serve Frontend
 app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")

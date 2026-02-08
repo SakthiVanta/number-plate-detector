@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Management | ALPR Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #0b0f1a;
+        }
+
+        .sidebar {
+            background: #111827;
+        }
+
+        .card {
+            background: #1f2937;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Agent Management Specific Styles */
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .agent-card {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .agent-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 10px 40px rgba(59, 130, 246, 0.2);
+        }
+
+        .agent-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+
+        /* Rest of Agent Management styles... */
+    </style>
+</head>
+
+<body class="bg-[#0b0f1a] text-slate-300">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 sidebar flex-shrink-0 flex flex-col border-r border-white/5">
+            <div class="p-6">
+                <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+                    <span class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-camera text-sm"></i>
+                    </span>
+                    ALPR Pro
+                </h1>
+            </div>
+            <nav class="flex-1 px-4 space-y-2 mt-4">
+                <a href="dashboard.html?view=dashboard" id="nav-dashboard"
+                    class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl transition-all">
+                    <i class="fas fa-chart-pie"></i>
+                    Dashboard
+                </a>
+                <a href="dashboard.html?view=videos" id="nav-videos"
+                    class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl transition-all">
+                    <i class="fas fa-video"></i>
+                    Videos
+                </a>
+                <a href="dashboard.html?view=detections" id="nav-detections"
+                    class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl transition-all">
+                    <i class="fas fa-table"></i>
+                    Detections
+                </a>
+                <a href="dashboard.html?view=monitor" id="nav-monitor"
+                    class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl transition-all">
+                    <i class="fas fa-server"></i>
+                    System Status
+                </a>
+                <a href="agents.html" id="nav-agents"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-white bg-blue-600/10 rounded-xl border border-blue-500/20">
+                    <i class="fas fa-robot"></i>
+                    Agent Factory
+                </a>
+                <a href="workflow.html" id="nav-workflow"
+                    class="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl transition-all">
+                    <i class="fas fa-project-diagram"></i>
+                    Workflows
+                </a>
+            </nav>
+            <div class="p-4 mt-auto mb-4">
+                <button onclick="localStorage.removeItem('token'); window.location.href='auth.html';"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-400/10 rounded-xl transition-all">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#0b0f1a]">
+            <!-- Header -->
+            <header class="h-16 flex items-center justify-between px-8 border-b border-white/5">
+                <h2 class="text-lg font-semibold text-white">Agent Factory</h2>
+                <div class="flex items-center gap-4">
+                    <span id="user-email" class="text-sm text-slate-400"></span>
+                    <div
+                        class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white">
+                        U</div>
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-8">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h1 class="text-3xl font-bold text-white">Agent Management</h1>
+                        <p class="text-slate-400 mt-2">Configure and optimize your AI detection agents</p>
+                    </div>
+                </div>
+
+                <div class="agents-grid" id="agents-container">
+                    <!-- Agents loaded dynamically -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+
+
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 class="text-2xl font-bold" id="modalTitle">Edit Agent</h2>
+                    <p class="text-slate-400 text-sm mt-1" id="modalDescription"></p>
+                </div>
+                <button onclick="closeEditModal()" class="text-slate-400 hover:text-white text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <textarea class="prompt-editor" id="promptEditor" spellcheck="false"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+                <button class="btn-save" onclick="saveAgent()">
+                    <i class="fas fa-save mr-2"></i>Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="frontend/js/api.js"></script>
+    <script>
+        let currentAgent = null;
+
+        async function loadAgents() {
+            try {
+                const data = await api.get('/agents');
+                const container = document.getElementById('agents-container');
+
+                container.innerHTML = data.agents.map(agent => `
+                    <div class="agent-card" onclick="editAgent('${agent.id}')">
+                        <div class="agent-header">
+                            <div class="agent-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <div class="agent-info">
+                                <h3>${agent.name}</h3>
+                                <div class="agent-status">
+                                    ${agent.exists ? '<span style="color: #10b981;">● Active</span>' : '<span style="color: #ef4444;">● Inactive</span>'}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="agent-description">${agent.description}</div>
+                        <div class="agent-stats">
+                            <div class="stat-item">
+                                <i class="fas fa-file-code"></i>
+                                ${agent.prompt_length} chars
+                            </div>
+                            <div class="stat-item">
+                                <i class="fas fa-${agent.editable ? 'unlock' : 'lock'}"></i>
+                                ${agent.editable ? 'Editable' : 'Read-only'}
+                            </div>
+                        </div>
+                        <div class="agent-actions" onclick="event.stopPropagation();">
+                            <button class="btn-edit" onclick="editAgent('${agent.id}')">
+                                <i class="fas fa-edit mr-2"></i>Edit Prompt
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading agents:', error);
+                alert('Failed to load agents');
+            }
+        }
+
+        async function editAgent(agentId) {
+            try {
+                const agent = await api.get(`/agents/${agentId}`);
+                currentAgent = agent;
+
+                document.getElementById('modalTitle').textContent = `Edit ${agent.name}`;
+                document.getElementById('modalDescription').textContent = agent.description;
+                document.getElementById('promptEditor').value = agent.prompt;
+                document.getElementById('editModal').classList.add('active');
+            } catch (error) {
+                console.error('Error loading agent:', error);
+                alert('Failed to load agent details');
+            }
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+            currentAgent = null;
+        }
+
+        async function saveAgent() {
+            if (!currentAgent) return;
+
+            const newPrompt = document.getElementById('promptEditor').value;
+
+            try {
+                await api.put(`/agents/${currentAgent.id}`, {
+                    prompt: newPrompt
+                });
+
+                alert('Agent updated successfully! Restart the server to apply changes.');
+                closeEditModal();
+                loadAgents();
+            } catch (error) {
+                console.error('Error saving agent:', error);
+                alert('Failed to save agent');
+            }
+        }
+
+        // Load agents on page load
+        loadAgents();
+    </script>
+</body>
+
+</html>

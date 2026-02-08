@@ -17,6 +17,13 @@ class RecheckStatus(enum.Enum):
     SKIPPED = "skipped"
     NONE = "none"
 
+class StepStatus(enum.Enum):
+    PENDING = "pending"
+    ACTIVE = "active"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    SKIPPED = "skipped"
+
 class CaseStatus(enum.Enum):
     OPEN = "open"
     SOLVED = "solved"
@@ -179,6 +186,26 @@ class AgentLog(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     case = relationship("VehicleCase", back_populates="agent_logs")
+
+class ProcessingStep(Base):
+    """
+    Tracks each step of the video processing pipeline for n8n-style visualization.
+    Real-time updates broadcast via WebSocket.
+    """
+    __tablename__ = "processing_steps"
+
+    id = Column(Integer, primary_key=True, index=True)
+    video_id = Column(Integer, ForeignKey("videos.id"), index=True)
+    step_name = Column(String, nullable=False)  # e.g., "VIDEO_UPLOAD", "DETECTION", "BATCHING"
+    step_order = Column(Integer, nullable=False)  # Display order in flowchart
+    status = Column(Enum(StepStatus), default=StepStatus.PENDING)
+    started_at = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
+    error_message = Column(String, nullable=True)
+    details = Column(String, nullable=True)  # JSON blob for step-specific data
+    
+    video = relationship("Video", backref=backref("processing_steps", cascade="all, delete-orphan"))
+
 
 # Composite Index for faster searching
 Index("idx_detections_plate_ts", VehicleDetection.plate_number, VehicleDetection.timestamp)

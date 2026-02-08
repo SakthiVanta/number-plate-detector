@@ -31,7 +31,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         videos: document.getElementById('nav-videos'),
         detections: document.getElementById('nav-detections'),
         monitor: document.getElementById('nav-monitor'),
-        agents: document.getElementById('nav-agents')
+        agents: document.getElementById('nav-agents'),
+        workflow: document.getElementById('nav-workflow')
     };
 
     const contentArea = document.getElementById('content-area');
@@ -97,31 +98,55 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Hide all views
         Object.values(views).forEach(v => v.classList.add('hidden'));
         // Show target view
-        views[viewName].classList.remove('hidden');
+        if (views[viewName]) {
+            views[viewName].classList.remove('hidden');
+        }
 
         // Update Nav UI
         Object.keys(navButtons).forEach(key => {
-            if (key === viewName) {
-                navButtons[key].classList.add('bg-blue-600/10', 'text-white', 'border', 'border-blue-500/20');
-            } else {
-                navButtons[key].classList.remove('bg-blue-600/10', 'text-white', 'border', 'border-blue-500/20');
+            if (navButtons[key]) {
+                if (key === viewName) {
+                    navButtons[key].classList.add('bg-blue-600/10', 'text-white', 'border', 'border-blue-500/20');
+                } else {
+                    navButtons[key].classList.remove('bg-blue-600/10', 'text-white', 'border', 'border-blue-500/20');
+                }
             }
         });
 
         // Update Header
-        pageTitle.innerText = viewName === 'monitor' ? 'System Hardware Monitor' : viewName.charAt(0).toUpperCase() + viewName.slice(1);
+        if (pageTitle) {
+            pageTitle.innerText = viewName === 'monitor' ? 'System Hardware Monitor' : viewName.charAt(0).toUpperCase() + viewName.slice(1);
+        }
 
         if (viewName === 'videos') loadVideos();
         if (viewName === 'detections') loadDetections();
         if (viewName === 'monitor') fetchSystemHealth();
         if (viewName === 'agents') loadAgentSettings();
+
+        // Update URL without reload
+        const url = new URL(window.location);
+        url.searchParams.set('view', viewName);
+        window.history.pushState({}, '', url);
     }
 
-    navButtons.dashboard.onclick = () => switchView('dashboard');
-    navButtons.videos.onclick = () => switchView('videos');
-    navButtons.detections.onclick = () => switchView('detections');
-    navButtons.monitor.onclick = () => switchView('monitor');
-    navButtons.agents.onclick = () => switchView('agents');
+    // Handle initial view from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialView = urlParams.get('view') || 'dashboard';
+    if (views[initialView]) {
+        switchView(initialView);
+    } else {
+        switchView('dashboard');
+    }
+
+    navButtons.dashboard.onclick = (e) => { e.preventDefault(); switchView('dashboard'); };
+    navButtons.videos.onclick = (e) => { e.preventDefault(); switchView('videos'); };
+    navButtons.detections.onclick = (e) => { e.preventDefault(); switchView('detections'); };
+    navButtons.monitor.onclick = (e) => { e.preventDefault(); switchView('monitor'); };
+    // Agents and Workflow can be regular links if they are separate pages, 
+    // but dashboard.html HAS an agents-view. 
+    // If the user wants to use agents.html, we should decide.
+    // Given the request, I'll let Agents link to agents.html and Workflow to workflow.html.
+    // But for dashboard.html internal views, we intercept.
 
     logoutBtn.onclick = () => {
         localStorage.removeItem('token');
@@ -251,13 +276,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                             </div>
                         </div>
 
-                        <div class="mt-auto flex gap-2 pt-2">
-                             <button onclick="showLogs(${v.id}, '${v.filename}')" class="flex-[1.5] py-2 bg-slate-700/50 hover:bg-slate-700 text-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2">
+                        <div class="mt-auto flex flex-wrap gap-2 pt-2">
+                             <button onclick="showLogs(${v.id}, '${v.filename}')" class="flex-1 py-2 bg-slate-700/50 hover:bg-slate-700 text-slate-300 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2">
                                 <i class="fas fa-terminal opacity-50"></i> Logs
                             </button>
-                            <button onclick="showAnalysisReport(${v.id})" class="flex-[2] py-2 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 rounded-xl text-[10px] font-black uppercase tracking-widest border border-blue-500/20 transition-all flex items-center justify-center gap-2">
+                            <button onclick="showAnalysisReport(${v.id})" class="flex-1 py-2 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 rounded-xl text-[10px] font-black uppercase tracking-widest border border-blue-500/20 transition-all flex items-center justify-center gap-2">
                                 <i class="fas fa-file-medical-alt"></i> Report
                             </button>
+                            <a href="workflow.html?video=${v.id}" class="flex-1 py-2 bg-purple-600/10 hover:bg-purple-600/20 text-purple-400 rounded-xl text-[10px] font-black uppercase tracking-widest border border-purple-500/20 transition-all flex items-center justify-center gap-2">
+                                <i class="fas fa-project-diagram"></i> Workflow
+                            </a>
                         </div>
                     </div>
                 </div>

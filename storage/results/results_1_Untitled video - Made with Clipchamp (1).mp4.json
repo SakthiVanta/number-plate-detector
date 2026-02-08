@@ -2,8 +2,8 @@
     {
         "id": 1,
         "plate_number": "DLCE5987",
-        "confidence": 0.1,
-        "vehicle_info": "Silver Maruti Alto K10",
+        "confidence": 0.8,
+        "vehicle_info": "Silver Maruti Alto",
         "timestamp": 1.6,
         "video_id": 1,
         "track_id": 1
@@ -11,7 +11,7 @@
     {
         "id": 2,
         "plate_number": "DLICO5234",
-        "confidence": 0.95,
+        "confidence": 0.9,
         "vehicle_info": "Red Renault Duster",
         "timestamp": 1.6,
         "video_id": 1,
@@ -28,18 +28,18 @@
     },
     {
         "id": 4,
-        "plate_number": "DL 4S CE 4298",
+        "plate_number": "WB 40C 4230",
         "confidence": 0.95,
-        "vehicle_info": "Black Hero Splendor Plus",
+        "vehicle_info": "Black Hero Splendor",
         "timestamp": 0.5,
         "video_id": 1,
         "track_id": 4
     },
     {
         "id": 5,
-        "plate_number": "UNCERTAIN (Fragment)",
-        "confidence": 0.1,
-        "vehicle_info": "White Maruti Swift",
+        "plate_number": "WB 40C C 5961",
+        "confidence": 0.8,
+        "vehicle_info": "Black Hero Splendor",
         "timestamp": 0.4,
         "video_id": 1,
         "track_id": 8
@@ -48,16 +48,16 @@
         "id": 6,
         "plate_number": "UNCERTAIN (Fragment)",
         "confidence": 0.1,
-        "vehicle_info": "Black Hero Glamour",
+        "vehicle_info": "Black Honda CB Shine",
         "timestamp": 2.0,
         "video_id": 1,
         "track_id": 17
     },
     {
         "id": 7,
-        "plate_number": "NA (Fragment)",
-        "confidence": 0.0,
-        "vehicle_info": "Black Generic Bicycle",
+        "plate_number": "NA",
+        "confidence": 1.0,
+        "vehicle_info": "Black Generic",
         "timestamp": 1.9,
         "video_id": 1,
         "track_id": 18
@@ -65,8 +65,8 @@
     {
         "id": 8,
         "plate_number": "UNCERTAIN (Fragment)",
-        "confidence": 0.05,
-        "vehicle_info": "Dark Red Honda Activa",
+        "confidence": 0.1,
+        "vehicle_info": "Dark Generic",
         "timestamp": 2.0,
         "video_id": 1,
         "track_id": 35
