@@ -1,0 +1,74 @@
+[
+    {
+        "id": 1,
+        "plate_number": "DLCE5987",
+        "confidence": 0.1,
+        "vehicle_info": "Silver Maruti Alto K10",
+        "timestamp": 1.6,
+        "video_id": 1,
+        "track_id": 1
+    },
+    {
+        "id": 2,
+        "plate_number": "DLICO5234",
+        "confidence": 0.95,
+        "vehicle_info": "Red Renault Duster",
+        "timestamp": 1.6,
+        "video_id": 1,
+        "track_id": 2
+    },
+    {
+        "id": 3,
+        "plate_number": "UNCERTAIN (Fragment)",
+        "confidence": 0.1,
+        "vehicle_info": "Red Hero Splendor",
+        "timestamp": 0.0,
+        "video_id": 1,
+        "track_id": 3
+    },
+    {
+        "id": 4,
+        "plate_number": "DL 4S CE 4298",
+        "confidence": 0.95,
+        "vehicle_info": "Black Hero Splendor Plus",
+        "timestamp": 0.5,
+        "video_id": 1,
+        "track_id": 4
+    },
+    {
+        "id": 5,
+        "plate_number": "UNCERTAIN (Fragment)",
+        "confidence": 0.1,
+        "vehicle_info": "White Maruti Swift",
+        "timestamp": 0.4,
+        "video_id": 1,
+        "track_id": 8
+    },
+    {
+        "id": 6,
+        "plate_number": "UNCERTAIN (Fragment)",
+        "confidence": 0.1,
+        "vehicle_info": "Black Hero Glamour",
+        "timestamp": 2.0,
+        "video_id": 1,
+        "track_id": 17
+    },
+    {
+        "id": 7,
+        "plate_number": "NA (Fragment)",
+        "confidence": 0.0,
+        "vehicle_info": "Black Generic Bicycle",
+        "timestamp": 1.9,
+        "video_id": 1,
+        "track_id": 18
+    },
+    {
+        "id": 8,
+        "plate_number": "UNCERTAIN (Fragment)",
+        "confidence": 0.05,
+        "vehicle_info": "Dark Red Honda Activa",
+        "timestamp": 2.0,
+        "video_id": 1,
+        "track_id": 35
+    }
+]

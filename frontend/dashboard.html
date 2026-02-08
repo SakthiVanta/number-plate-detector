@@ -288,6 +288,55 @@
                         </div>
                     </div>
 
+                    <!-- v5.5: Forensic Performance Registry -->
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="card p-4 rounded-2xl border border-white/5 bg-slate-800/10 flex items-center gap-4">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <div>
+                                <p class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Total Yield
+                                </p>
+                                <p class="text-lg font-bold text-white" id="stat-total-yield">0</p>
+                            </div>
+                        </div>
+                        <div
+                            class="card p-4 rounded-2xl border border-white/5 bg-emerald-500/10 flex items-center gap-4">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                                <i class="fas fa-check-double"></i>
+                            </div>
+                            <div>
+                                <p class="text-[8px] font-black text-slate-500 uppercase tracking-widest">AI Success</p>
+                                <p class="text-lg font-bold text-white" id="stat-ai-success">0%</p>
+                            </div>
+                        </div>
+                        <div class="card p-4 rounded-2xl border border-white/5 bg-red-500/10 flex items-center gap-4">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-400">
+                                <i class="fas fa-microscope"></i>
+                            </div>
+                            <div>
+                                <p class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Active Audits
+                                </p>
+                                <p class="text-lg font-bold text-white" id="stat-active-audits">0</p>
+                            </div>
+                        </div>
+                        <div
+                            class="card p-4 rounded-2xl border border-white/5 bg-purple-500/10 flex items-center gap-4">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <div>
+                                <p class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Forensic Yield
+                                </p>
+                                <p class="text-lg font-bold text-white" id="stat-forensic-yield">0</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Rich Forensic List -->
                     <div id="detections-list" class="space-y-4">
                         <!-- Rich cards dynamically loaded here -->
@@ -413,7 +462,7 @@
                                 <span
                                     class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-bold">ACTIVE</span>
                             </div>
-                            <p class="text-[10px] text-slate-500">Handles real-time YOLOv8-seg tracking and ByteTrack
+                            <p class="text-[10px] text-slate-500">Handles real-time YOLOv11-seg tracking and ByteTrack
                                 unique ID assignment.</p>
                             <div class="flex items-center gap-2">
                                 <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>

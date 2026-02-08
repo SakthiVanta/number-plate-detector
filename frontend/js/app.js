@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentDetectionsPage = 0;
     const detectionsLimit = 10;
     let totalDetections = 0;
+    let ws = null; // WebSocket
 
     // Elements
     const views = {
@@ -57,11 +58,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         user = await api.get('/auth/me');
         userEmail.innerText = user.email;
+        initWebSocket(); // v5.1 Real-time Logs
         loadDashboardStats();
         fetchSystemHealth();
-        startPolling();
+        // startPolling(); // DISABLED in favor of WS + sparse polling
     } catch (err) {
         console.error(err);
+    }
+
+    // WebSocket Logic (v5.1)
+    function initWebSocket() {
+        const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        const url = `${proto}://${window.location.host}/api/ws/logs`;
+        console.log(`[WS] Connecting to ${url}...`);
+
+        ws = new WebSocket(url);
+
+        ws.onopen = () => {
+            console.log("[WS] Connected to Real-time Stream");
+        };
+
+        ws.onmessage = (event) => {
+            try {
+                const log = JSON.parse(event.data);
+                appendLogToModal(log);
+            } catch (e) { console.error("WS Parse Error", e); }
+        };
+
+        ws.onclose = () => {
+            console.warn("[WS] Disconnected. Reconnecting in 3s...");
+            setTimeout(initWebSocket, 3000);
+        };
     }
 
     // Navigation Logic
@@ -146,13 +173,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Data Loading Functions
+    // Data Loading Functions (v5.1 Optimized)
     async function loadDashboardStats() {
         try {
-            const videos = await api.get('/videos/');
-            statVideos.innerText = videos.length;
+            // Parallel Fetching for "5-Second Rule"
+            const [videos, detectionsResp, stats] = await Promise.all([
+                api.get('/videos/'),
+                api.get('/detections/'),
+                api.get('/stats')
+            ]);
 
-            // Load tasks (processing videos)
+            // 1. Video Stats
+            statVideos.innerText = videos.length;
             const tasks = videos.filter(v => v.status === 'processing' || v.status === 'pending');
             tasksList.innerHTML = tasks.length > 0
                 ? tasks.map(t => `<div class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5 hover:border-blue-500/30 transition-all">
@@ -165,21 +197,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </button>
                 </div>`).join('')
                 : `<p class="text-slate-500 text-sm italic">No active background tasks</p>`;
-        } catch (err) { console.error("Error loading videos stats:", err); }
 
-        try {
-            const detections = await api.get('/detections/');
-            statDetections.innerText = detections.total || 0;
-            const stats = await api.get('/stats');
+            // 2. Detection Stats
+            statDetections.innerText = detectionsResp.total || 0;
             document.getElementById('stats-failed').innerText = stats.total_failed;
 
-            // v2.3.2: Load Analytics for Latest Video
-            const videos = await api.get('/videos/');
+            // 3. Analytics Chart (Last Video)
             const lastVid = videos[0];
             if (lastVid && lastVid.analytics_data) {
                 renderTrafficChart(JSON.parse(lastVid.analytics_data));
             }
-        } catch (err) { console.error("Error loading detections stats:", err); }
+
+        } catch (err) { console.error("Error loading dashboard stats:", err); }
     }
 
     async function loadVideos() {
@@ -272,6 +301,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             detectionsList.innerHTML = detections.map(d => renderRichDetection(d)).join('');
+
+            // v5.5: Update Forensic Yield Stats
+            document.getElementById('stat-total-yield').innerText = totalDetections;
+            const verified = detections.filter(d => d.recheck_status === 'success').length;
+            const successRate = detections.length > 0 ? (verified / detections.length * 100).toFixed(0) : 0;
+            document.getElementById('stat-ai-success').innerText = `${successRate}%`;
+
+            const activeAudits = detections.filter(d => d.audit_required || d.recheck_status === 'failed').length;
+            document.getElementById('stat-active-audits').innerText = activeAudits;
+
+            const forensicYield = detections.filter(d => d.forensic_insight).length;
+            document.getElementById('stat-forensic-yield').innerText = forensicYield;
+
             updatePaginationUI();
         } catch (err) { console.error(err); }
     }
@@ -346,6 +388,51 @@ document.addEventListener('DOMContentLoaded', async () => {
             `;
         }
 
+        // Forensic Insights & Confidence Breakdown
+        let forensicHtml = '';
+        if (d.forensic_insight) {
+            forensicHtml = `
+                <div class="mt-4 p-3 bg-blue-500/5 rounded-xl border border-blue-500/10">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fas fa-microscope text-blue-400 text-[10px]"></i>
+                        <span class="text-[9px] font-black text-blue-400 uppercase tracking-widest">Forensic Logic</span>
+                    </div>
+                    <p class="text-[10px] text-slate-300 leading-relaxed italic">"${d.forensic_insight}"</p>
+                </div>
+            `;
+        }
+
+        let pConfHtml = '';
+        if (d.partial_confidence) {
+            try {
+                const pc = JSON.parse(d.partial_confidence);
+                const bars = [
+                    { label: 'STATE', val: pc.state || pc.state_code || 0 },
+                    { label: 'DIST', val: pc.dist || pc.district_code || 0 },
+                    { label: 'SERIES', val: pc.series || 0 },
+                    { label: 'L4', val: pc.last4 || pc.last_four || 0 }
+                ];
+                pConfHtml = `
+                    <div class="grid grid-cols-4 gap-2 mt-3">
+                        ${bars.map(b => `
+                            <div class="flex flex-col gap-1">
+                                <span class="text-[7px] font-black text-slate-500 text-center">${b.label}</span>
+                                <div class="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+                                    <div class="h-full bg-emerald-500 transition-all" style="width: ${(b.val * 100)}%"></div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } catch (e) { console.error("PConf Parse Fail", e); }
+        }
+
+        const auditBadge = d.audit_required ? `
+            <span class="bg-red-500/20 text-red-400 border-red-500/30 px-2 py-0.5 rounded text-[8px] font-black border flex items-center gap-1 animate-pulse">
+                <i class="fas fa-eye"></i> AI AUDIT NEEDED
+            </span>
+        ` : '';
+
         return `
             <div class="card rounded-2xl border border-white/5 bg-slate-800/20 overflow-hidden transition-all group hover:border-blue-500/30" id="det-card-${d.id}">
                 <div class="p-4 flex items-center justify-between cursor-pointer" onclick="toggleDetectionExpansion(${d.id})">
@@ -354,26 +441,35 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <i class="fas ${tIcon} text-xl"></i>
                         </div>
                         <div class="flex flex-col">
-                            <span class="text-[10px] font-black text-slate-500 uppercase tracking-tighter mb-1">Vehicle Match</span>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-[10px] font-black text-slate-500 uppercase tracking-tighter">Vehicle Match</span>
+                                ${auditBadge}
+                            </div>
                             <span class="text-lg font-mono font-bold text-white tracking-widest">${plate}</span>
                             ${safetyHtml}
                         </div>
                         <div class="h-8 w-[1px] bg-white/5"></div>
                         <div class="flex flex-col">
-                            <span class="text-[10px] font-black text-slate-500 uppercase tracking-tighter mb-1">AI Trust</span>
+                            <span class="text-[10px] font-black text-slate-500 uppercase tracking-tighter mb-1">AI Trust (FCF)</span>
                             <div class="flex items-center gap-2">
                                 <div class="w-16 h-1 bg-slate-700 rounded-full overflow-hidden">
-                                     <div class="h-full bg-blue-500" style="width: ${(d.confidence || 0) * 100}%"></div>
+                                     <div class="h-full bg-blue-500" style="width: ${(d.fcf_score ? d.fcf_score * 100 : (d.confidence || 0) * 100)}%"></div>
                                 </div>
-                                <span class="text-[10px] font-bold text-slate-400 font-mono">${((d.confidence || 0) * 100).toFixed(0)}%</span>
+                                <span class="text-[10px] font-bold text-slate-400 font-mono">${(d.fcf_score ? d.fcf_score * 100 : (d.confidence || 0) * 100).toFixed(0)}%</span>
                             </div>
                         </div>
                         <div class="h-8 w-[1px] bg-white/5"></div>
                         <div class="flex flex-col">
-                            <span class="text-[10px] font-black text-slate-500 uppercase tracking-tighter mb-1">Audit Mode</span>
-                            <span class="${s.bg} ${s.color} ${s.border} px-2 py-0.5 rounded text-[9px] font-black border flex items-center gap-1">
-                                <i class="fas ${s.icon}"></i> ${s.label}
-                            </span>
+                            <span class="text-[10px] font-black text-slate-500 uppercase tracking-tighter mb-1">Forensic Status</span>
+                            ${d.is_validated && d.recheck_status === 'success' ? `
+                                <span class="bg-blue-500/10 text-blue-400 border-blue-500/20 px-2 py-0.5 rounded text-[9px] font-black border flex items-center gap-1">
+                                    <i class="fas fa-shield-check"></i> SCAN SOLVED
+                                </span>
+                            ` : `
+                                <span class="${s.bg} ${s.color} ${s.border} px-2 py-0.5 rounded text-[9px] font-black border flex items-center gap-1">
+                                    <i class="fas ${s.icon}"></i> ${s.label}
+                                </span>
+                            `}
                         </div>
                     </div>
                     <div class="flex items-center gap-4">
@@ -391,29 +487,70 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <!-- Forensic Collage -->
                         <div class="space-y-4">
                             <div class="flex items-center justify-between">
-                                <h5 class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Forensic Collage (v2.3)</h5>
-                                <button class="text-[9px] font-bold text-slate-500 hover:text-white transition-all uppercase"><i class="fas fa-expand mr-1"></i> Fullscreen</button>
+                                <h5 class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Forensic Collage (v5.5)</h5>
+                                <div class="flex gap-2">
+                                     <span class="text-[9px] font-mono text-slate-500">BATCH: ${d.batch_id || 'LOCAL'}</span>
+                                     <span class="text-[9px] font-mono text-slate-500">TRACK: ${d.track_id}</span>
+                                </div>
                             </div>
-                            <div class="aspect-video bg-black rounded-xl border border-white/5 overflow-hidden flex items-center justify-center relative">
+                            <div class="aspect-video bg-black rounded-xl border border-white/5 overflow-hidden flex items-center justify-center relative group">
                                 ${d.batch ? `<img src="/api/raw_files/${d.batch.collage_path}" class="w-full h-full object-cover">` : `<div class="text-center opacity-20"><i class="fas fa-camera text-4xl mb-2"></i><p class="text-[10px]">No collage stored for this batch</p></div>`}
-                                <div class="absolute bottom-4 left-4 text-[9px] font-mono bg-black/60 px-2 py-1 rounded text-white/50 border border-white/10">TRACK_ID: ${d.track_id}</div>
+                                <div class="absolute inset-0 bg-blue-500/10 opacity-0 group-hover:opacity-100 transition-all pointer-events-none"></div>
+                                <div class="absolute bottom-4 left-4 text-[9px] font-mono bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-lg text-white/70 border border-white/10 shadow-2xl">
+                                    <i class="fas fa-microchip mr-2 text-blue-400"></i>STABILITY: ${(d.stability_score || 0).toFixed(2)} | VR: ${(d.visual_rank || 0).toFixed(2)}
+                                </div>
                             </div>
                         </div>
 
                         <!-- Analysis Workspace -->
                         <div class="flex flex-col h-full">
-                            <h5 class="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-4">AI Audit & Verification</h5>
-                            <div class="flex-1 bg-slate-900 rounded-xl border border-white/5 p-4 overflow-hidden flex flex-col">
-                                <div class="flex items-center gap-2 mb-4">
-                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                    <span class="text-[10px] font-bold text-slate-400 uppercase">Gemini 1.5 Flash Analysis</span>
+                            <h5 class="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-4">Forensic Analysis Registry</h5>
+                            <div class="flex-1 bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-white/5 p-5 flex flex-col shadow-inner">
+                                <div class="grid grid-cols-2 gap-4 mb-6">
+                                    <!-- Vehicle Metadata -->
+                                    <div class="space-y-3">
+                                        <div class="flex flex-col gap-1">
+                                            <span class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Make & Model</span>
+                                            <span class="text-xs font-bold text-white">${d.make_model || 'Unknown'}</span>
+                                        </div>
+                                        <div class="flex flex-col gap-1">
+                                            <span class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Body Color</span>
+                                            <span class="text-xs font-bold text-white">${d.vehicle_info || 'N/A'}</span>
+                                        </div>
+                                    </div>
+                                    <!-- Occupant Metadata -->
+                                    <div class="space-y-3">
+                                        <div class="flex flex-col gap-1">
+                                            <span class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Helmet Detection</span>
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-black w-fit ${d.helmet_status === 'YES' ? 'bg-emerald-500/10 text-emerald-400' : d.helmet_status === 'NO' ? 'bg-red-500/10 text-red-400' : 'bg-slate-700/30 text-slate-500'}">
+                                                ${d.helmet_status || 'N/A'}
+                                            </span>
+                                        </div>
+                                        <div class="flex flex-col gap-1">
+                                            <span class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Occupants</span>
+                                            <span class="text-xs font-bold text-white">${d.passenger_count || 1} Person(s)</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="flex-1 overflow-y-auto pr-2 space-y-4">
-                                    ${d.vehicle_info ? `<p class="text-xs text-white leading-relaxed font-medium bg-white/5 p-3 rounded-lg border border-white/5">${d.vehicle_info}</p>` : `<p class="text-xs text-slate-600 italic">No deep-analysis metadata available.</p>`}
+
+                                <div class="flex-1 overflow-y-auto space-y-4 min-h-[120px]">
+                                    <div class="p-4 bg-white/5 rounded-2xl border border-white/5 space-y-2">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-[9px] font-black text-blue-400 uppercase">AI Thought Trail</span>
+                                            <span class="text-[8px] font-mono text-slate-600">${d.ocr_source || 'LOCAL'}</span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-300 leading-relaxed italic">"${d.forensic_insight || 'Master Auditor performed secondary validation on collage fragments. Semantics verified against visual class.'}"</p>
+                                    </div>
+                                    ${pConfHtml}
                                 </div>
-                                <div class="mt-4 pt-4 border-t border-white/5 flex gap-2">
-                                    <button onclick="editDetection(${d.id}, '${d.plate_number}')" class="flex-1 py-2 text-[10px] font-black uppercase bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 rounded-lg border border-blue-500/20 transition-all">Manual Correct</button>
-                                    <button onclick="deleteDetection(${d.id})" class="flex-1 py-2 text-[10px] font-black uppercase bg-red-600/10 hover:bg-red-600/20 text-red-400 rounded-lg border border-red-500/20 transition-all">Invalidate</button>
+
+                                <div class="mt-6 pt-4 border-t border-white/5 flex gap-3">
+                                    <button onclick="editDetection(${d.id}, '${d.plate_number}')" class="flex-1 py-2.5 text-[10px] font-black uppercase bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white rounded-xl border border-blue-500/20 transition-all">
+                                        <i class="fas fa-edit mr-2"></i>CORRECT
+                                    </button>
+                                    <button onclick="deleteDetection(${d.id})" class="flex-1 py-2.5 text-[10px] font-black uppercase bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white rounded-xl border border-red-500/20 transition-all">
+                                        <i class="fas fa-trash mr-2"></i>DISCARD
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -798,6 +935,62 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // Stream Logs to UI
+    window.appendLogToModal = (log) => {
+        const container = document.getElementById('logs-container');
+        if (!container) return;
+
+        // Auto-scroll logic: Check if user is near bottom
+        const isNearBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
+
+        const timeStr = new Date(log.timestamp).toLocaleTimeString([], { hour12: false });
+        let colorClass = "text-blue-400";
+        if (log.event_type === "GEMINI") colorClass = "text-purple-400";
+        if (log.event_type === "CAPTURER") colorClass = "text-emerald-400";
+        if (log.level === "ERROR") colorClass = "text-red-400 font-bold";
+        if (log.level === "WARNING") colorClass = "text-yellow-400";
+
+        // Filter Logic
+        const filterVal = document.getElementById('logs-agent-filter').value;
+        if (filterVal && log.event_type !== filterVal) return;
+
+        const div = document.createElement('div');
+        div.className = "flex gap-4 group hover:bg-white/5 p-1 rounded transition-all animate-in fade-in slide-in-from-left-2 duration-300";
+        div.innerHTML = `
+            <span class="text-slate-600 w-16 shrink-0 font-mono">${timeStr}</span>
+            <span class="font-black w-20 shrink-0 uppercase ${colorClass} text-[10px] tracking-wider">[${log.event_type}]</span>
+            <span class="text-slate-300 flex-1 break-all">${log.message}</span>
+        `;
+
+        container.appendChild(div);
+
+        // Limit DOM size to prevent lag (Keep last 500 logs)
+        if (container.children.length > 500) {
+            container.removeChild(container.firstChild);
+        }
+
+        if (isNearBottom) {
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Update Counter
+        const count = document.getElementById('logs-count');
+        if (count) count.innerText = `${container.children.length} EVENTS CAPTURED`;
+    };
+
+    window.showLogs = (vidId, filename) => {
+        document.getElementById('logs-modal').classList.remove('hidden');
+        document.getElementById('logs-title').innerText = `Live Console: ${filename}`;
+    };
+
+    window.closeLogsModal = () => {
+        document.getElementById('logs-modal').classList.add('hidden');
+    };
+
+    window.clearLogs = () => {
+        document.getElementById('logs-container').innerHTML = '';
+    };
+
     async function fetchDetailedSystemInfo() {
         await fetchSystemHealth();
     }
@@ -1027,7 +1220,17 @@ window.showLogs = async (videoId, filename, agentFilter = '') => {
             }
 
             container.innerHTML = logs.map(l => {
-                const time = new Date(l.created_at).toLocaleTimeString();
+                let timeStr = "---";
+                try {
+                    const d = new Date(l.created_at);
+                    if (!isNaN(d.getTime())) {
+                        timeStr = d.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    } else {
+                        // Fallback: try parsing if it's already a string or just show raw
+                        timeStr = l.created_at ? l.created_at.split('T')[1]?.split('.')[0] || "---" : "---";
+                    }
+                } catch (e) { console.warn("Date Parse Error", e); }
+
                 const colorMap = {
                     'AI_RECHECK': 'text-blue-400',
                     'GEMINI': 'text-blue-400',
@@ -1037,7 +1240,9 @@ window.showLogs = async (videoId, filename, agentFilter = '') => {
                     'QC': 'text-emerald-400',
                     'DETECTION': 'text-slate-200',
                     'DETECTOR': 'text-slate-200',
-                    'SYSTEM': 'text-slate-400'
+                    'SYSTEM': 'text-slate-400',
+                    'COMMIT': 'text-cyan-400',
+                    'MATRIX': 'text-amber-400'
                 };
                 const iconMap = {
                     'AI_RECHECK': 'fa-robot',
@@ -1048,7 +1253,9 @@ window.showLogs = async (videoId, filename, agentFilter = '') => {
                     'QC': 'fa-shield-halved',
                     'DETECTION': 'fa-crosshairs',
                     'DETECTOR': 'fa-crosshairs',
-                    'SYSTEM': 'fa-info-circle'
+                    'SYSTEM': 'fa-info-circle',
+                    'COMMIT': 'fa-bolt',
+                    'MATRIX': 'fa-microchip'
                 };
 
                 const colorClass = l.is_error ? 'text-red-400' : (colorMap[l.event_type] || 'text-slate-400');
@@ -1058,11 +1265,11 @@ window.showLogs = async (videoId, filename, agentFilter = '') => {
                 return `<div class="border-b border-white/5 pb-1">
                     <div class="flex gap-3 hover:bg-white/5 p-1 rounded transition-all ${hasExtra ? 'cursor-pointer' : ''} ${colorClass}" 
                          ${hasExtra ? `onclick="toggleLogDetails(${l.id})"` : ''}>
-                        <span class="opacity-30 flex-shrink-0 font-mono">${time}</span>
+                        <span class="opacity-30 flex-shrink-0 font-mono text-[10px]">${timeStr}</span>
                         <span class="w-20 font-bold uppercase text-[9px] flex-shrink-0 flex items-center gap-1">
                             <i class="fas ${icon}"></i>${l.event_type}
                         </span>
-                        <span class="flex-1">${l.message}</span>
+                        <span class="flex-1 text-[11px]">${l.message}</span>
                         ${hasExtra ? '<i class="fas fa-chevron-down text-[8px] opacity-30 mt-1"></i>' : ''}
                     </div>
                     <div id="log-details-${l.id}" class="hidden mt-2 ml-10 p-3 bg-black/40 rounded-lg border border-white/5 text-[10px] overflow-x-auto">
@@ -1071,15 +1278,18 @@ window.showLogs = async (videoId, filename, agentFilter = '') => {
                 </div>`;
             }).join('');
 
-            // Auto scroll
-            container.scrollTop = container.scrollHeight;
+            // Auto scroll to bottom only if user hasn't scrolled up
+            const isNearBottom = container.scrollHeight - container.clientHeight - container.scrollTop < 50;
+            if (isNearBottom) {
+                container.scrollTop = container.scrollHeight;
+            }
         } catch (err) {
             console.error(err);
         }
     };
 
     fetchLogs();
-    window.logInterval = setInterval(fetchLogs, 3000);
+    window.logInterval = setInterval(fetchLogs, 1000); // v5.5: 1s for "Real-time" feel in In-Process mode
 };
 
 window.toggleLogDetails = async (logId) => {

@@ -1,29 +1,37 @@
 from pydantic_settings import BaseSettings
+from pydantic import AliasChoices, Field
 
 class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./vehicle_detect.db"
-    YOLO_MODEL_PATH: str = "weights/yolov8n.pt"
+    YOLO_MODEL_PATH: str = "weights/yolo11n.pt"
     PLATE_MODEL_PATH: str = "weights/license_plate_detector.pt"
     STORAGE_PATH: str = "storage"
     FRAME_SAMPLING_RATE: float = 0.5
     REDIS_URL: str = "redis://localhost:6379/0"
-    USE_CELERY: bool = True # Set to False to run processing in-process (No Redis needed)
+    USE_CELERY: bool = False # Set to False to run processing in-process (No Redis needed)
     
     SECRET_KEY: str = "your-super-secret-key-change-this-in-production"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
+    # v5.1 Security Hardening
+    ENABLE_SETUP_WIZARD: bool = True # Forces setup on first load if no admin exists    
     # Global AI Rechecker Settings
-    GEMINI_API_KEY: str = "" # Set in .env
+    GEMINI_API_KEY: str = Field("", validation_alias=AliasChoices('GEMINI_API_KEY', 'GOOGLE_API_KEY'))
     RECHECK_CONFIDENCE_THRESHOLD: float = 0.85
     ENABLE_GLOBAL_RECHECK: bool = True
     
     # v2.3 Agentic & Collage Settings
-    COLLAGE_SIZE: int = 9 # Match 3x3 grid
-    COLLAGE_GRID_SIZE: tuple = (3, 3) 
+    COLLAGE_SIZE: int = 20 # Increased from 9 for better batch coverage
+    COLLAGE_GRID_SIZE: tuple = (4, 5) # 4 rows x 5 columns = 20 slots 
     DETECTION_THRESHOLD: float = 0.25 # Lowered for high sensitivity
     TRACK_PERSISTENCE_FRAMES: int = 6 # Was 15, reduced for high-speed traffic
     AGENTS_SENSITIVITY: str = "HIGH" # HIGH, BALANCED, LOW
+
+    # v5.1 Cost Optimization
+    ENABLE_TIERED_ROUTING: bool = True # If True, use Flash first, then Pro if uncertain
+    MODEL_FLASH: str = "gemini-2.5-flash"
+    MODEL_PRO: str = "gemini-3-flash"
     
     # Optimization & Chunking
     CHUNK_DURATION_MINUTES: int = 15

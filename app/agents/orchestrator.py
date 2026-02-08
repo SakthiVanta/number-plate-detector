@@ -67,17 +67,34 @@ class OrchestratorAgent:
         return case
 
     def _log_thought(self, db: Session, case_id: int, step: int, action: str, reasoning: str, tool_output: dict = None):
-        log = AgentLog(
-            case_id=case_id,
-            step_number=step,
-            agent_name="Orchestrator",
-            action_taken=action,
-            reasoning=reasoning,
-            tool_output=json.dumps(tool_output) if tool_output else None
-        )
-        db.add(log)
-        db.flush()
-        print(f"    └─ [CASE #{case_id}] {action}: {reasoning}")
-        logger.info(f"[CASE #{case_id}] Step {step}: {action} - {reasoning}")
+        # v5.1: XAI Explanation Generation
+        xai_map = {
+            "INITIAL_SCAN": "Detected a new vehicle entering the scene.",
+            "ENHANCEMENT_TRIGGER": "Image quality is too low for reliable reading. Enhancing...",
+            "HYBRID_OCR_SELECT": "Choosing the best recognition engine based on image clarity.",
+            "AUDIT_COMPLETE": "Verification steps finished."
+        }
+        explanation = xai_map.get(action, reasoning)
+        
+        # Use new Forensic Service for logging
+        from app.services.forensic_service import forensic_service
+        try:
+             # We manually insert here to keep existing step logic or refactor forensic_service to return log obj
+             # For minimal friction, we will just set the new field on the AgentLog directly here
+            log = AgentLog(
+                case_id=case_id,
+                step_number=step,
+                agent_name="Orchestrator",
+                action_taken=action,
+                reasoning=reasoning,
+                xai_reasoning=explanation, # v5.1 Field
+                tool_output=json.dumps(tool_output) if tool_output else None
+            )
+            db.add(log)
+            db.flush()
+            print(f"    └─ [CASE #{case_id}] {action}: {reasoning}")
+            logger.info(f"[CASE #{case_id}] Step {step}: {action} - {reasoning}")
+        except Exception as e:
+            logger.error(f"Failed to log thought: {e}")
 
 orchestrator = OrchestratorAgent()

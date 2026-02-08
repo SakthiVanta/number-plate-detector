@@ -3,9 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 import logging
-from app.api import auth, videos, detections, system, v2_api, v5_api
+from app.api import auth, videos, detections, system, v2_api, v5_api, health, stream, agents
 from app.db.session import engine, Base, SessionLocal
 from app.models.models import Video, User
+from app.core.log_handler import RedisLogHandler
 from jose import jwt
 import os
 from app.core.config import settings
@@ -13,6 +14,20 @@ from app.core.config import settings
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# v5.1: Attach Redis Handler for WebSockets
+if settings.USE_CELERY:
+    try:
+        redis_handler = RedisLogHandler(settings.REDIS_URL, "system_logs")
+        redis_handler.setLevel(logging.INFO)
+        logging.getLogger().addHandler(redis_handler)
+    except Exception as e:
+        logger.warning(f"Could not attach Redis Log Handler: {e}")
+else:
+    logger.info("Redis Logging Disabled (USE_CELERY=False). Attaching Database Log Handler for In-Process mode.")
+    from app.core.log_handler import db_log_handler
+    db_log_handler.setLevel(logging.INFO)
+    logging.getLogger().addHandler(db_log_handler)
 
 print(">>> Starting ALPR Pro v2 API...")
 # Create database tables
@@ -53,6 +68,8 @@ app.include_router(detections.router, prefix="/api/detections", tags=["Detection
 app.include_router(system.router, prefix="/api", tags=["System"])
 app.include_router(v2_api.router, prefix="/api/v2", tags=["Agentic v2.3"])
 app.include_router(v5_api.router, prefix="/api/v5", tags=["Master v5.0"])
+app.include_router(health.router, prefix="/api", tags=["System Health"])
+app.include_router(stream.router, prefix="/api", tags=["Real-time Streaming"])
 
 # Serve Frontend
 app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
@@ -105,4 +122,4 @@ async def get_raw_file(file_path: str):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True, reload_dirs=["app"])

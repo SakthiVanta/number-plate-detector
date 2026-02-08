@@ -12,6 +12,41 @@ from app.api import deps
 
 router = APIRouter()
 
+@router.get("/setup/status")
+def check_setup_status(db: Session = Depends(get_db)):
+    """
+    Checks if the system is already set up (has at least one admin).
+    """
+    admin = db.query(models.User).filter(models.User.is_active == 1).first()
+    return {"is_setup": admin is not None, "wizard_enabled": settings.ENABLE_SETUP_WIZARD}
+
+@router.post("/setup")
+def initial_setup(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
+    """
+    Initial System Setup: Creates the first admin user.
+    Only allows creation if no users exist.
+    """
+    if not settings.ENABLE_SETUP_WIZARD:
+         raise HTTPException(status_code=403, detail="Setup Wizard is disabled.")
+         
+    existing_user = db.query(models.User).first()
+    if existing_user:
+        raise HTTPException(
+            status_code=403,
+            detail="System already set up. Please login.",
+        )
+        
+    db_user = models.User(
+        email=user_in.email,
+        full_name=user_in.full_name or "System Administrator",
+        hashed_password=security.get_password_hash(user_in.password),
+        is_active=1
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
 @router.post("/register", response_model=schemas.User)
 def register_user(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.email == user_in.email).first()

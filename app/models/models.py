@@ -84,7 +84,17 @@ class VehicleDetection(Base):
     blur_score = Column(Float, nullable=True) # Laplacian Variance
     ocr_source = Column(String, default="LOCAL") # LOCAL, CLOUD, or CONSENSUS
     best_frame_timestamp = Column(Float, nullable=True) # Millisecond of the "Golden Frame"
-    raw_inference_log = Column(String, nullable=True) # JSON blob for audit review
+    # v5.1 Forensic Integrity Fields
+    chain_of_custody_hash = Column(String, nullable=True) # SHA-256 of the crop
+    
+    # v5.5 Formula Layer Fields
+    fcf_score = Column(Float, nullable=True) # Forensic Confidence Score
+    visual_rank = Column(Float, nullable=True) # Sharpness/Contrast score
+    stability_score = Column(Float, nullable=True) # Temporal consistency score
+    raw_inference_log = Column(String, nullable=True) # Raw JSON from Gemini
+    audit_required = Column(Boolean, default=False) # Flag for manual review
+    forensic_insight = Column(String, nullable=True) # AI Reasoning (XAI)
+    partial_confidence = Column(String, nullable=True) # JSON blob for state/dist/series/last4
     
     timestamp = Column(Float)  
     frame_index = Column(Integer)
@@ -102,6 +112,10 @@ class DetectionBatch(Base):
     collage_path = Column(String) # Path to the 10-image stitched grid
     raw_json = Column(String, nullable=True) # Gemini response JSON
     cost_estimate = Column(Float, default=0.0)
+    
+    # v5.1 Forensic Integrity
+    collage_hash = Column(String, nullable=True) # SHA-256 of the collage file
+
     created_at = Column(DateTime, default=datetime.utcnow)
 
     video = relationship("Video", back_populates="batches")
@@ -137,6 +151,11 @@ class VehicleCase(Base):
     enhanced_frame_path = Column(String, nullable=True) # Path to the AI-Restored image (if used)
     
     status = Column(Enum(CaseStatus), default=CaseStatus.OPEN)
+    
+    # v5.1 Forensic fields
+    is_stalker = Column(Boolean, default=False) # Flagged for frequent movement
+    forensic_insight = Column(String, nullable=True) # Global case insight
+    
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -152,6 +171,10 @@ class AgentLog(Base):
     agent_name = Column(String) # "Orchestrator", "Enhancer", "Auditor"
     action_taken = Column(String) # e.g., "INVOKED_SUPER_RES"
     reasoning = Column(String) # "Raw crop variance below threshold."
+    
+    # v5.1 XAI
+    xai_reasoning = Column(String, nullable=True) # Human-readable "Why"
+
     tool_output = Column(String, nullable=True) # JSON raw data
     created_at = Column(DateTime, default=datetime.utcnow)
 

@@ -1,9 +1,10 @@
 fastapi[all]
 sqlalchemy
 psycopg2-binary
-ultralytics
+ultralytics>=8.3.0
 easyocr
 opencv-python
+opencv-python-headless
 python-dotenv
 pydantic-settings
 uvicorn
@@ -20,3 +21,5 @@ redis
 decord
 ffmpeg-python
 google-generativeai
+# basicsr
+# realesrgan

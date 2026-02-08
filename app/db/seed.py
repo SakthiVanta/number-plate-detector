@@ -11,6 +11,11 @@ def seed_db():
     
     db = SessionLocal()
     try:
+        from app.core.config import settings
+        if settings.ENABLE_SETUP_WIZARD:
+            print(">>> Setup Wizard Enabled: Skipping default admin creation.")
+            return
+
         # Check if admin exists
         admin_email = "admin@alpr.pro"
         admin = db.query(User).filter(User.email == admin_email).first()

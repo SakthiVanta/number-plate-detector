@@ -64,6 +64,12 @@ class VehicleDetection(VehicleDetectionBase):
     ocr_source: Optional[str] = None
     best_frame_timestamp: Optional[float] = 0.0
     raw_inference_log: Optional[str] = None
+    forensic_insight: Optional[str] = None
+    audit_required: bool = False
+    fcf_score: Optional[float] = None
+    visual_rank: Optional[float] = None
+    stability_score: Optional[float] = None
+    partial_confidence: Optional[str] = None
     
     track_id: Optional[int]
     created_at: datetime
@@ -87,6 +93,9 @@ class ProcessingLog(BaseModel):
 
     class Config:
         from_attributes = True
+        json_encoders = {
+            datetime: lambda v: v.isoformat() if v else None
+        }
 
 class VideoBase(BaseModel):
     filename: str

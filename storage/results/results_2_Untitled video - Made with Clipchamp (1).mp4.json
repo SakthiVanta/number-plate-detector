@@ -1,0 +1,74 @@
+[
+    {
+        "id": 10,
+        "plate_number": "DLCE5987",
+        "confidence": 0.1,
+        "vehicle_info": "Silver Maruti Alto",
+        "timestamp": 1.6,
+        "video_id": 2,
+        "track_id": 1
+    },
+    {
+        "id": 11,
+        "plate_number": "DLICO5234",
+        "confidence": 0.95,
+        "vehicle_info": "Red Renault Duster",
+        "timestamp": 1.6,
+        "video_id": 2,
+        "track_id": 2
+    },
+    {
+        "id": 12,
+        "plate_number": "UNCERTAIN (Fragment)",
+        "confidence": 0.1,
+        "vehicle_info": "Red Hero Splendor",
+        "timestamp": 0.0,
+        "video_id": 2,
+        "track_id": 3
+    },
+    {
+        "id": 13,
+        "plate_number": "HR 49 P 5239",
+        "confidence": 0.85,
+        "vehicle_info": "Black Hero Splendor Plus",
+        "timestamp": 0.5,
+        "video_id": 2,
+        "track_id": 4
+    },
+    {
+        "id": 14,
+        "plate_number": "HR 49 P 5239",
+        "confidence": 0.9,
+        "vehicle_info": "Black Hero Splendor Plus",
+        "timestamp": 0.4,
+        "video_id": 2,
+        "track_id": 8
+    },
+    {
+        "id": 15,
+        "plate_number": "UNCERTAIN (Fragment)",
+        "confidence": 0.1,
+        "vehicle_info": "Dark Grey Honda CB Shine",
+        "timestamp": 2.0,
+        "video_id": 2,
+        "track_id": 17
+    },
+    {
+        "id": 16,
+        "plate_number": "NA",
+        "confidence": 1.0,
+        "vehicle_info": "Black Generic Bicycle",
+        "timestamp": 1.9,
+        "video_id": 2,
+        "track_id": 18
+    },
+    {
+        "id": 17,
+        "plate_number": "UNCERTAIN (Fragment)",
+        "confidence": 0.05,
+        "vehicle_info": "Maroon Generic Scooter",
+        "timestamp": 2.0,
+        "video_id": 2,
+        "track_id": 35
+    }
+]
